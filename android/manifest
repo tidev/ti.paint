@@ -1,0 +1,13 @@
+version: 1.0
+description: Paint for Android
+author: Fred Spencer
+license: Appcelerator Enterprise Subscription
+copyright: Copyright (c) 2011 by Appcelerator, Inc.
+
+
+# these should not be edited
+name: paint
+moduleid: ti.paint
+guid: de06ebe1-4ab9-44da-85e4-7409b24190eb
+platform: android
+minsdk: 1.6.0
