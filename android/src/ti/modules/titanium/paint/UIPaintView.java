@@ -25,6 +25,7 @@ public class UIPaintView extends TiUIView {
 	private static final String LCAT = "UIPaintView";
 
 	public Paint tiPaint;
+	public PaintView tiPaintView;
 	private KrollDict props;
 	private Boolean eraseState = false;
 	private int alphaState = 255; // alpha resets on changes, so store
@@ -116,6 +117,11 @@ public class UIPaintView extends TiUIView {
 			}
 			return true;
 		}
+
+		public void clear() {
+		    tiBitmap.eraseColor(Color.TRANSPARENT);
+			invalidate();
+		}
 	}
 
 	public void setStrokeWidth(Float width) {
@@ -150,6 +156,11 @@ public class UIPaintView extends TiUIView {
 		alphaState = alpha;
 	}
 
+	public void clear() {
+		Log.d(LCAT, "Clearing.");
+		tiPaintView.clear();
+	}
+
 	public UIPaintView(TiViewProxy proxy) {
 		super(proxy);
 
@@ -157,7 +168,7 @@ public class UIPaintView extends TiUIView {
 
 		setPaintOptions(); // set initial paint options
 
-		setNativeView(new PaintView(proxy.getContext()));
+		setNativeView(tiPaintView = new PaintView(proxy.getContext()));
 	}
 
 }

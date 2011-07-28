@@ -1,44 +1,21 @@
-# paint Module
+# Ti.Paint Module
 
 ## Description
 
 Provides a paint surface user interface view.
 
-## Accessing the paint Module
+## Accessing the Ti.Paint Module
 
-To access this module from JavaScript, you would do the following (recommended):
+To access this module from JavaScript, you would do the following:
 
-	Titanium.Paint = require('ti.paint');
-	Ti.Paint = Titanium.Paint;
-	
-The paint variable is a reference to the Module object.	
-
-## Reference
-
-## Functions
+	Titanium.Paint = Ti.Paint = require("ti.paint");
 
 ### Ti.Paint.createPaintView({...})
 
-Returns a paint view:
- 	
-- strokeWidth*[float]*
-- strokeColor*[string]*
-- strokeAlpha*[int]*
-- eraseMode*[boolean]*
+Creates a [Ti.Paint.PaintView][] object.
 
-## Module Installation and Use
+## Usage
 
-- Put the module zip file into the root folder of your Titanium application.
-- Set the `<module>` element in tiapp.xml, such as this:
-    <modules>
-	    <module version="1.0">ti.paint</module>
-	</modules>
-- See example
+See example
 
-## Author
-
-Fred Spencer <fspencer@appcelerator.com>, Appcelerator Inc.
-
-## License
-
-&copy; 2011 Appcelerator Inc.
+[Ti.Paint.PaintView]: paintView.html

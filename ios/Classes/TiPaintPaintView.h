@@ -6,13 +6,14 @@
  */
 #import "TiUIView.h"
 
-@interface TiPaintView : TiUIView {
+@interface TiPaintPaintView : TiUIView {
 @private
 	UIImageView *drawImage;
 	CGPoint lastPoint;
 	CGFloat strokeWidth;
+	CGFloat strokeAlpha;
 	CGColorRef strokeColor;
-	
+	bool erase;
 }
 
 @end

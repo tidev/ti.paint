@@ -1,5 +1,5 @@
 version: 1.0
-description: Paint for Android
+description: Provides a paint surface user interface view.
 author: Fred Spencer
 license: Appcelerator Enterprise Subscription
 copyright: Copyright (c) 2011 by Appcelerator, Inc.

@@ -1,53 +1,48 @@
+Titanium.Paint = Ti.Paint = require('ti.paint');
 
-/*
- * Creates a paint view, and allows you to change colors.
- */
-
-// open a single window
-var window = Ti.UI.createWindow({
-  backgroundColor:'white'
+var win = Ti.UI.createWindow({ backgroundColor: '#fff' });
+var paintView = Ti.Paint.createPaintView({
+    top:0, right:0, bottom:80, left:0,
+    // strokeWidth (float), strokeColor (string), strokeAlpha (int, 0-255)
+    strokeColor:'#0f0', strokeAlpha:255, strokeWidth:10,
+    eraseMode:false
 });
+win.add(paintView);
 
-Titanium.Painter = require('ti.paint');
-var painter = Titanium.Painter.createView({
-	top:10,
-	left:10,
-	right:10,
-	height:350,
+var buttonStrokeWidth = Ti.UI.createButton({ left:10, bottom:10, right:10, height:30, title:'Decrease Stroke Width' });
+buttonStrokeWidth.addEventListener('click', function(e) {
+	paintView.strokeWidth = (paintView.strokeWidth === 10) ? 5 : 10;
+	e.source.title = (paintView.strokeWidth === 10) ? 'Decrease Stroke Width' : 'Increase Stroke Width';
 });
-window.add(painter);
+win.add(buttonStrokeWidth);
 
-function f(e) {
-	painter.strokeColor = e.source.backgroundColor;
-}
+var buttonStrokeColorRed = Ti.UI.createButton({ bottom:100, left:10, width:75, height:30, title:'Red' });
+buttonStrokeColorRed.addEventListener('click', function() { paintView.strokeColor = 'red'; });
+var buttonStrokeColorGreen = Ti.UI.createButton({ bottom:70, left:10, width:75, height:30, title:'Green' });
+buttonStrokeColorGreen.addEventListener('click', function() { paintView.strokeColor = '#0f0'; });
+var buttonStrokeColorBlue = Ti.UI.createButton({ bottom:40, left:10, width:75, height:30, title:'Blue' });
+buttonStrokeColorBlue.addEventListener('click', function() { paintView.strokeColor = '#0000ff'; });
+win.add(buttonStrokeColorRed);
+win.add(buttonStrokeColorGreen);
+win.add(buttonStrokeColorBlue);
 
-var redView = Ti.UI.createView({
-	bottom:20,
-	left:20,
-	width:40,
-	height:40,
-	backgroundColor:'red'
+var clear = Ti.UI.createButton({ bottom:40, left:100, width:75, height:30, title:'Clear' });
+clear.addEventListener('click', function() { paintView.clear(); });
+win.add(clear);
+
+var buttonStrokeAlpha = Ti.UI.createButton({ bottom:70, right:10, width:100, height:30, title:'Alpha : 100%' });
+buttonStrokeAlpha.addEventListener('click', function(e) {
+	paintView.strokeAlpha = (paintView.strokeAlpha === 255) ? 127 : 255;
+	e.source.title = (paintView.strokeAlpha === 255) ? 'Alpha : 100%' : 'Alpha : 50%';
 });
-window.add(redView);
-redView.addEventListener('touchend', f);
+win.add(buttonStrokeAlpha);
 
-var blueView = Ti.UI.createView({
-	bottom:20,
-	width:40,
-	height:40,
-	backgroundColor:'blue'
+var buttonStrokeColorEraser = Ti.UI.createButton({ bottom:40, right:10, width:100, height:30, title:'Erase : Off' });
+buttonStrokeColorEraser.addEventListener('click', function(e) {
+	paintView.eraseMode = (paintView.eraseMode) ? false : true;
+	e.source.title = (paintView.eraseMode) ? 'Erase : On' : 'Erase : Off';
 });
-window.add(blueView);
-blueView.addEventListener('touchend', f);
+win.add(buttonStrokeColorEraser);
 
-var blackView = Ti.UI.createView({
-	bottom:20,
-	right:20,
-	width:40,
-	height:40,
-	backgroundColor:'black'
-});
-window.add(blackView);
-blackView.addEventListener('touchend', f);
+win.open();
 
-window.open();

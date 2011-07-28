@@ -3,7 +3,7 @@
 # during compilation, packaging, distribution, etc.
 #
 version: 1.0
-description: Titanium Paint Module 
+description: Provides a paint surface user interface view.
 author: Jeff Haynie 
 license: Appcelerator Commercial License 
 copyright: Copyright (c) 2010 by Appcelerator, Inc. 

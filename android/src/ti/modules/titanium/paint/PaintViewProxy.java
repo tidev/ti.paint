@@ -50,4 +50,9 @@ public class PaintViewProxy extends TiViewProxy {
 	public void setStrokeAlpha(int alpha) {
 		paintView.setStrokeAlpha(alpha);
 	}
+
+	@Kroll.method(runOnUiThread=true)
+	public void clear() {
+	    paintView.clear();
+	}
 }

@@ -6,7 +6,7 @@
  */
 #import "TiViewProxy.h"
 
-@interface TiPaintViewProxy : TiViewProxy {
+@interface TiPaintPaintViewProxy : TiViewProxy {
 
 @private
 

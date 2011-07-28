@@ -22,10 +22,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		24A833D41200FF9D0026778E /* TiPaintView.h in Headers */ = {isa = PBXBuildFile; fileRef = 24A833D21200FF9D0026778E /* TiPaintView.h */; };
-		24A833D51200FF9D0026778E /* TiPaintView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A833D31200FF9D0026778E /* TiPaintView.m */; };
-		24A833D81200FFB10026778E /* TiPaintViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 24A833D61200FFB10026778E /* TiPaintViewProxy.h */; };
-		24A833D91200FFB10026778E /* TiPaintViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A833D71200FFB10026778E /* TiPaintViewProxy.m */; };
+		24A833D41200FF9D0026778E /* TiPaintPaintView.h in Headers */ = {isa = PBXBuildFile; fileRef = 24A833D21200FF9D0026778E /* TiPaintPaintView.h */; };
+		24A833D51200FF9D0026778E /* TiPaintPaintView.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A833D31200FF9D0026778E /* TiPaintPaintView.m */; };
+		24A833D81200FFB10026778E /* TiPaintPaintViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 24A833D61200FFB10026778E /* TiPaintPaintViewProxy.h */; };
+		24A833D91200FFB10026778E /* TiPaintPaintViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 24A833D71200FFB10026778E /* TiPaintPaintViewProxy.m */; };
 		24DD6CF91134B3F500162E58 /* TiPaintModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DD6CF71134B3F500162E58 /* TiPaintModule.h */; };
 		24DD6CFA1134B3F500162E58 /* TiPaintModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DD6CF81134B3F500162E58 /* TiPaintModule.m */; };
 		24DE9E1111C5FE74003F90F6 /* TiPaintModuleAssets.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DE9E0F11C5FE74003F90F6 /* TiPaintModuleAssets.h */; };
@@ -45,10 +45,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		24A833D21200FF9D0026778E /* TiPaintView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiPaintView.h; path = Classes/TiPaintView.h; sourceTree = "<group>"; };
-		24A833D31200FF9D0026778E /* TiPaintView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiPaintView.m; path = Classes/TiPaintView.m; sourceTree = "<group>"; };
-		24A833D61200FFB10026778E /* TiPaintViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiPaintViewProxy.h; path = Classes/TiPaintViewProxy.h; sourceTree = "<group>"; };
-		24A833D71200FFB10026778E /* TiPaintViewProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiPaintViewProxy.m; path = Classes/TiPaintViewProxy.m; sourceTree = "<group>"; };
+		24A833D21200FF9D0026778E /* TiPaintPaintView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiPaintPaintView.h; path = Classes/TiPaintPaintView.h; sourceTree = "<group>"; };
+		24A833D31200FF9D0026778E /* TiPaintPaintView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiPaintPaintView.m; path = Classes/TiPaintPaintView.m; sourceTree = "<group>"; };
+		24A833D61200FFB10026778E /* TiPaintPaintViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiPaintPaintViewProxy.h; path = Classes/TiPaintPaintViewProxy.h; sourceTree = "<group>"; };
+		24A833D71200FFB10026778E /* TiPaintPaintViewProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiPaintPaintViewProxy.m; path = Classes/TiPaintPaintViewProxy.m; sourceTree = "<group>"; };
 		24DD6CF71134B3F500162E58 /* TiPaintModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TiPaintModule.h; path = Classes/TiPaintModule.h; sourceTree = "<group>"; };
 		24DD6CF81134B3F500162E58 /* TiPaintModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TiPaintModule.m; path = Classes/TiPaintModule.m; sourceTree = "<group>"; };
 		24DD6D1B1134B66800162E58 /* titanium.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = titanium.xcconfig; sourceTree = "<group>"; };
@@ -105,10 +105,10 @@
 				24DE9E1011C5FE74003F90F6 /* TiPaintModuleAssets.m */,
 				24DD6CF71134B3F500162E58 /* TiPaintModule.h */,
 				24DD6CF81134B3F500162E58 /* TiPaintModule.m */,
-				24A833D21200FF9D0026778E /* TiPaintView.h */,
-				24A833D31200FF9D0026778E /* TiPaintView.m */,
-				24A833D61200FFB10026778E /* TiPaintViewProxy.h */,
-				24A833D71200FFB10026778E /* TiPaintViewProxy.m */,
+				24A833D21200FF9D0026778E /* TiPaintPaintView.h */,
+				24A833D31200FF9D0026778E /* TiPaintPaintView.m */,
+				24A833D61200FFB10026778E /* TiPaintPaintViewProxy.h */,
+				24A833D71200FFB10026778E /* TiPaintPaintViewProxy.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -132,8 +132,8 @@
 				AA747D9F0F9514B9006C5449 /* TiPaint_Prefix.pch in Headers */,
 				24DD6CF91134B3F500162E58 /* TiPaintModule.h in Headers */,
 				24DE9E1111C5FE74003F90F6 /* TiPaintModuleAssets.h in Headers */,
-				24A833D41200FF9D0026778E /* TiPaintView.h in Headers */,
-				24A833D81200FFB10026778E /* TiPaintViewProxy.h in Headers */,
+				24A833D41200FF9D0026778E /* TiPaintPaintView.h in Headers */,
+				24A833D81200FFB10026778E /* TiPaintPaintViewProxy.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,7 +164,11 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "paint" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* paint */;
 			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
 			projectDirPath = "";
@@ -199,8 +203,8 @@
 			files = (
 				24DD6CFA1134B3F500162E58 /* TiPaintModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* TiPaintModuleAssets.m in Sources */,
-				24A833D51200FF9D0026778E /* TiPaintView.m in Sources */,
-				24A833D91200FFB10026778E /* TiPaintViewProxy.m in Sources */,
+				24A833D51200FF9D0026778E /* TiPaintPaintView.m in Sources */,
+				24A833D91200FFB10026778E /* TiPaintPaintViewProxy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +235,7 @@
 				GCC_PREFIX_HEADER = TiPaint_Prefix.pch;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = TiPaint;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
@@ -246,6 +251,7 @@
 				GCC_PREFIX_HEADER = TiPaint_Prefix.pch;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = TiPaint;
+				SDKROOT = iphoneos;
 			};
 			name = Release;
 		};

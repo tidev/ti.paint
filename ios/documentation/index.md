@@ -1,25 +1,21 @@
-# paint Module
+# Ti.Paint Module
 
 ## Description
 
-TODO: Enter your module description here
+Provides a paint surface user interface view.
 
-## Accessing the paint Module
+## Accessing the Ti.Paint Module
 
 To access this module from JavaScript, you would do the following:
 
-	var paint = require("ti.paint");
+	Titanium.Paint = Ti.Paint = require("ti.paint");
 
-The paint variable is a reference to the Module object.	
+### Ti.Paint.createPaintView({...})
 
-## Reference
-
-### ti.paint.createView({...})
-
-Creates a [ti.paint.View][] object.
+Creates a [Ti.Paint.PaintView][] object.
 
 ## Usage
 
 See example
 
-[ti.paint.View]: paintView.html
+[Ti.Paint.PaintView]: paintView.html

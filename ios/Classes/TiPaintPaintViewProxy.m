@@ -5,10 +5,10 @@
  * and licensed under the Apache Public License (version 2)
  */
 
-#import "TiPaintViewProxy.h"
+#import "TiPaintPaintViewProxy.h"
 #import "TiUtils.h"
 
-@implementation TiPaintViewProxy
+@implementation TiPaintPaintViewProxy
 
 
 -(void)clear:(id)args
