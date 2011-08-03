@@ -16,7 +16,7 @@ Clears the paint view.
 
 Controls the width of the strokes.
 
-### strokeColor[object]
+### strokeColor[string]
 
 Controls the color of the strokes.
 
