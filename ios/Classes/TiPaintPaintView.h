@@ -9,7 +9,6 @@
 @interface TiPaintPaintView : TiUIView {
 @private
 	UIImageView *drawImage;
-	CGPoint lastPoint;
 	CGFloat strokeWidth;
 	CGFloat strokeAlpha;
 	CGColorRef strokeColor;

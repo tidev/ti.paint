@@ -44,16 +44,23 @@ public class UIPaintView extends TiUIView {
 	}
 
 	public class PaintView extends View {
-		private Bitmap  tiBitmap;
-		private Canvas  tiCanvas;
-		private Path    tiPath;
-		private Paint   tiBitmapPaint;
+
+		private static final int maxTouchPoints = 20;
+
+		private float[] tiX;
+		private float[] tiY;
+
+		private Path[] tiPaths;
+		private Bitmap tiBitmap;
+		private Canvas tiCanvas;
+		private Paint tiBitmapPaint;
 
 		public PaintView(Context c) {
 			super(c);
-
-			tiPath = new Path();
 			tiBitmapPaint = new Paint(Paint.DITHER_FLAG);
+			tiPaths = new Path[maxTouchPoints];
+			tiX = new float[maxTouchPoints];
+			tiY = new float[maxTouchPoints];
 		}
 
 		@Override
@@ -65,73 +72,98 @@ public class UIPaintView extends TiUIView {
 
 		@Override
 		protected void onDraw(Canvas canvas) {
-			canvas.drawColor((props.containsKeyAndNotNull(TiC.PROPERTY_BACKGROUND_COLOR)) ? TiConvert.toColor(props, TiC.PROPERTY_BACKGROUND_COLOR) : TiConvert.toColor("transparent") );
-
+			boolean containsBG = props.containsKeyAndNotNull(TiC.PROPERTY_BACKGROUND_COLOR);
+			canvas.drawColor(containsBG ? TiConvert.toColor(props, TiC.PROPERTY_BACKGROUND_COLOR) : TiConvert.toColor("transparent"));
 			canvas.drawBitmap(tiBitmap, 0, 0, tiBitmapPaint);
 
-			canvas.drawPath(tiPath, tiPaint);
-		}
-
-		private float tiX, tiY;
-		private static final float TOUCH_TOLERANCE = 4;
-
-		private void touch_start(float x, float y) {
-			tiPath.reset();
-			tiPath.moveTo(x, y);
-			tiX = x;
-			tiY = y;
-		}
-		private void touch_move(float x, float y) {
-			float dx = Math.abs(x - tiX);
-			float dy = Math.abs(y - tiY);
-			if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-				tiPath.quadTo(tiX, tiY, (x + tiX)/2, (y + tiY)/2);
-				tiX = x;
-				tiY = y;
+			for (int i = 0; i < maxTouchPoints; i++) {
+				if (tiPaths[i] != null) {
+					canvas.drawPath(tiPaths[i], tiPaint);
+				}
 			}
 		}
-		private void touch_up() {
-			tiPath.lineTo(tiX, tiY);
-			tiCanvas.drawPath(tiPath, tiPaint);
-			tiPath.reset();
+
+		private void touch_start(int id, float x, float y) {
+			if (tiPaths[id] != null) {
+				tiCanvas.drawPath(tiPaths[id], tiPaint);
+				tiPaths[id].reset();
+			} else {
+				tiPaths[id] = new Path();
+			}
+			tiPaths[id].moveTo(x, y);
+			tiX[id] = x;
+			tiY[id] = y;
+		}
+
+		private void touch_move(int id, float x, float y) {
+			if (tiPaths[id] == null) {
+				tiPaths[id] = new Path();
+				tiPaths[id].moveTo(tiX[id], tiY[id]);
+			}
+			tiPaths[id].quadTo(tiX[id], tiY[id], (x + tiX[id]) / 2, (y + tiY[id]) / 2);
+			tiX[id] = x;
+			tiY[id] = y;
 		}
 
 		@Override
-		public boolean onTouchEvent(MotionEvent event) {
-			float x = event.getX();
-			float y = event.getY();
-
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				touch_start(x, y);
-				invalidate();
-				break;
-			case MotionEvent.ACTION_MOVE:
-				touch_move(x, y);
-				invalidate();
-				break;
-			case MotionEvent.ACTION_UP:
-				touch_up();
-				invalidate();
-				break;
+		public boolean onTouchEvent(MotionEvent mainEvent) {
+			for (int i = 0; i < mainEvent.getPointerCount(); i++) {
+				int id = mainEvent.getPointerId(i);
+				float x = mainEvent.getX(id);
+				float y = mainEvent.getY(id);
+				int action = mainEvent.getAction();
+				if (action > 6) {
+					action = (action % 256) - 5;
+				}
+				switch (action) {
+					case MotionEvent.ACTION_DOWN:
+						touch_start(id, x, y);
+						invalidate();
+						break;
+					case MotionEvent.ACTION_MOVE:
+						touch_move(id, x, y);
+						invalidate();
+						break;
+					case MotionEvent.ACTION_UP:
+						if (eraseState) {
+							// When erasing, we need to be rather aggressive with finalizing the paths.
+							finalizePaths();
+							invalidate();
+						}
+						break;
+				}
 			}
+
 			return true;
 		}
 
+		public void finalizePaths() {
+			for (int i = 0; i < maxTouchPoints; i++) {
+				if (tiPaths[i] != null) {
+					tiCanvas.drawPath(tiPaths[i], tiPaint);
+					tiPaths[i].reset();
+					tiPaths[i] = null;
+				}
+			}
+		}
+
 		public void clear() {
-		    tiBitmap.eraseColor(Color.TRANSPARENT);
+			finalizePaths();
+			tiBitmap.eraseColor(Color.TRANSPARENT);
 			invalidate();
 		}
 	}
 
 	public void setStrokeWidth(Float width) {
 		Log.d(LCAT, "Changing stroke width.");
+		tiPaintView.finalizePaths();
 		tiPaint.setStrokeWidth(width);
 		tiPaint.setAlpha(alphaState);
 	}
 
-	public void setEraseMode(Boolean toggle) {		
+	public void setEraseMode(Boolean toggle) {
 		eraseState = toggle;
+		tiPaintView.finalizePaths();
 
 		if (eraseState) {
 			Log.d(LCAT, "Setting Erase Mode to True.");
@@ -146,12 +178,14 @@ public class UIPaintView extends TiUIView {
 
 	public void setStrokeColor(String color) {
 		Log.d(LCAT, "Changing stroke color.");
+		tiPaintView.finalizePaths();
 		tiPaint.setColor(TiConvert.toColor(color));
 		tiPaint.setAlpha(alphaState);
 	}
 
 	public void setStrokeAlpha(int alpha) {
 		Log.d(LCAT, "Changing stroke alpha.");
+		tiPaintView.finalizePaths();
 		tiPaint.setAlpha(alpha);
 		alphaState = alpha;
 	}
