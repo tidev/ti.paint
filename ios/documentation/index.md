@@ -8,7 +8,7 @@ Provides a paint surface user interface view.
 
 To access this module from JavaScript, you would do the following:
 
-	Titanium.Paint = Ti.Paint = require("ti.paint");
+	var Paint = require('ti.paint');
 
 ### Ti.Paint.createPaintView({...})
 

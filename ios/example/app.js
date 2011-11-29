@@ -1,7 +1,7 @@
-Titanium.Paint = Ti.Paint = require('ti.paint');
+var Paint = require('ti.paint');
 
 var win = Ti.UI.createWindow({ backgroundColor: '#fff' });
-var paintView = Ti.Paint.createPaintView({
+var paintView = Paint.createPaintView({
     top:0, right:0, bottom:80, left:0,
     // strokeWidth (float), strokeColor (string), strokeAlpha (int, 0-255)
     strokeColor:'#0f0', strokeAlpha:255, strokeWidth:10,
