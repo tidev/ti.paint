@@ -50,7 +50,6 @@
 	{
 		drawImage = [[UIImageView alloc] initWithImage:nil];
 		drawImage.frame = [self bounds];
-        drawImage.multipleTouchEnabled = YES;
 		[self addSubview:drawImage];
 	}
 	return drawImage;
@@ -164,6 +163,20 @@
 - (void)setStrokeAlpha_:(id)alpha
 {
     strokeAlpha = [TiUtils floatValue:alpha] / 255.0;
+}
+
+- (void)setImage_:(id)value
+{
+    ENSURE_UI_THREAD(setImage_, value);
+    RELEASE_TO_NIL(drawImage);
+    UIImage* image = value == nil ? nil : [TiUtils image:value proxy:self.proxy];
+    if (image != nil) {
+        drawImage = [[UIImageView alloc] initWithImage:image];
+        drawImage.frame = [self bounds];
+        [self addSubview:drawImage];
+        UIView *view = [self imageView];
+        [drawImage.image drawInRect:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
+    }
 }
 
 - (void)clear:(id)args

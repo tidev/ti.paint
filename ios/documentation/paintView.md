@@ -27,3 +27,7 @@ Controls the opacity of the strokes.
 ### eraseMode[boolean]
 
 Controls if the strokes are in "erase mode" -- that is, any existing paint will be erased.
+
+### image[string]
+
+Loads an image (by its URL) directly in to the paint view so that it can be drawn on and erased.

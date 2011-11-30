@@ -14,6 +14,7 @@ import org.appcelerator.titanium.util.Log;
 import org.appcelerator.titanium.TiC;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.util.TiConvert;
+import org.appcelerator.titanium.view.TiDrawableReference;
 import org.appcelerator.titanium.view.TiUIView;
 
 import android.content.Context;
@@ -30,6 +31,20 @@ public class UIPaintView extends TiUIView {
 	private Boolean eraseState = false;
 	private int alphaState = 255; // alpha resets on changes, so store
 
+	public UIPaintView(TiViewProxy proxy) {
+		super(proxy);
+
+		props = proxy.getProperties();
+
+		setPaintOptions(); // set initial paint options
+
+		setNativeView(tiPaintView = new PaintView(proxy.getContext()));
+		
+		if (props.containsKeyAndNotNull("image")) {
+			tiPaintView.setImage(props.getString("image"));
+		}
+	}
+	
 	private void setPaintOptions() {
 		tiPaint = new Paint();
 		tiPaint.setAntiAlias(true);
@@ -43,6 +58,52 @@ public class UIPaintView extends TiUIView {
 		alphaState = (props.containsKeyAndNotNull("strokeAlpha")) ? TiConvert.toInt(props.get("strokeAlpha")) : 255;
 	}
 
+	public void setStrokeWidth(Float width) {
+		Log.d(LCAT, "Changing stroke width.");
+		tiPaintView.finalizePaths();
+		tiPaint.setStrokeWidth(width);
+		tiPaint.setAlpha(alphaState);
+	}
+
+	public void setEraseMode(Boolean toggle) {
+		eraseState = toggle;
+		tiPaintView.finalizePaths();
+
+		if (eraseState) {
+			Log.d(LCAT, "Setting Erase Mode to True.");
+			tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+		} else {
+			Log.d(LCAT, "Setting Erase Mode to False.");
+			tiPaint.setXfermode(null);
+		}
+
+		tiPaint.setAlpha(alphaState);
+	}
+
+	public void setStrokeColor(String color) {
+		Log.d(LCAT, "Changing stroke color.");
+		tiPaintView.finalizePaths();
+		tiPaint.setColor(TiConvert.toColor(color));
+		tiPaint.setAlpha(alphaState);
+	}
+
+	public void setStrokeAlpha(int alpha) {
+		Log.d(LCAT, "Changing stroke alpha.");
+		tiPaintView.finalizePaths();
+		tiPaint.setAlpha(alpha);
+		alphaState = alpha;
+	}
+
+	public void setImage(String imagePath) {
+		Log.d(LCAT, "Changing image.");
+		tiPaintView.setImage(imagePath);
+	}
+
+	public void clear() {
+		Log.d(LCAT, "Clearing.");
+		tiPaintView.clear();
+	}
+
 	public class PaintView extends View {
 
 		private static final int maxTouchPoints = 20;
@@ -52,6 +113,7 @@ public class UIPaintView extends TiUIView {
 
 		private Path[] tiPaths;
 		private Bitmap tiBitmap;
+		private String tiImage;
 		private Canvas tiCanvas;
 		private Paint tiBitmapPaint;
 
@@ -66,7 +128,13 @@ public class UIPaintView extends TiUIView {
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			super.onSizeChanged(w, h, oldw, oldh);
-			tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+			if (tiImage != null) {
+				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy.getTiContext(), tiImage);
+				tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
+			}
+			else {
+				tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+			}
 			tiCanvas = new Canvas(tiBitmap);
 		}
 
@@ -147,62 +215,26 @@ public class UIPaintView extends TiUIView {
 			}
 		}
 
+		public void setImage(String imagePath) {
+			Log.i(LCAT, "setImage called");
+			tiImage = imagePath;
+			if (tiImage == null) {
+				clear();
+			} else {
+				finalizePaths();
+				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy.getTiContext(), tiImage);
+				tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
+				tiCanvas = new Canvas(tiBitmap);
+				invalidate();
+			}
+		}
+
 		public void clear() {
 			finalizePaths();
 			tiBitmap.eraseColor(Color.TRANSPARENT);
+			
 			invalidate();
 		}
-	}
-
-	public void setStrokeWidth(Float width) {
-		Log.d(LCAT, "Changing stroke width.");
-		tiPaintView.finalizePaths();
-		tiPaint.setStrokeWidth(width);
-		tiPaint.setAlpha(alphaState);
-	}
-
-	public void setEraseMode(Boolean toggle) {
-		eraseState = toggle;
-		tiPaintView.finalizePaths();
-
-		if (eraseState) {
-			Log.d(LCAT, "Setting Erase Mode to True.");
-			tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-		} else {
-			Log.d(LCAT, "Setting Erase Mode to False.");
-			tiPaint.setXfermode(null);
-		}
-
-		tiPaint.setAlpha(alphaState);
-	}
-
-	public void setStrokeColor(String color) {
-		Log.d(LCAT, "Changing stroke color.");
-		tiPaintView.finalizePaths();
-		tiPaint.setColor(TiConvert.toColor(color));
-		tiPaint.setAlpha(alphaState);
-	}
-
-	public void setStrokeAlpha(int alpha) {
-		Log.d(LCAT, "Changing stroke alpha.");
-		tiPaintView.finalizePaths();
-		tiPaint.setAlpha(alpha);
-		alphaState = alpha;
-	}
-
-	public void clear() {
-		Log.d(LCAT, "Clearing.");
-		tiPaintView.clear();
-	}
-
-	public UIPaintView(TiViewProxy proxy) {
-		super(proxy);
-
-		props = proxy.getProperties();
-
-		setPaintOptions(); // set initial paint options
-
-		setNativeView(tiPaintView = new PaintView(proxy.getContext()));
 	}
 
 }

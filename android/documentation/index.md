@@ -17,7 +17,7 @@ Creates a [Ti.Paint.PaintView][] object.
 #### Arguments
 
 * parameters [object] - (optional) a dictionary object properties defined in [Titanium.UI.View][]
-
+                                                                                                 
 ## Module History
 
 View the [change log](changelog.html) for this module.

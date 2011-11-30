@@ -8,14 +8,11 @@
 package ti.modules.titanium.paint;
 
 import org.appcelerator.kroll.annotations.Kroll;
-
 import org.appcelerator.titanium.TiContext;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.view.TiUIView;
 
 import android.app.Activity;
-
-import ti.modules.titanium.paint.UIPaintView;
 
 @Kroll.proxy(creatableInModule=PaintModule.class)
 public class PaintViewProxy extends TiViewProxy {
@@ -49,6 +46,11 @@ public class PaintViewProxy extends TiViewProxy {
 	@Kroll.setProperty @Kroll.method
 	public void setStrokeAlpha(int alpha) {
 		paintView.setStrokeAlpha(alpha);
+	}
+
+	@Kroll.setProperty @Kroll.method
+	public void setImage(String imagePath) {
+		paintView.setImage(imagePath);
 	}
 
 	@Kroll.method(runOnUiThread=true)
