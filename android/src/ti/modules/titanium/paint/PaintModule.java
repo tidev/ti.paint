@@ -10,11 +10,9 @@ package ti.modules.titanium.paint;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 
-import org.appcelerator.titanium.TiContext;
-
-@Kroll.module(name="Paint", id="ti.paint")
+@Kroll.module(name = "Paint", id = "ti.paint")
 public class PaintModule extends KrollModule {
-	public PaintModule(TiContext tiContext) {
-		super(tiContext);
+	public PaintModule() {
+		super();
 	}
 }

@@ -38,13 +38,13 @@ public class UIPaintView extends TiUIView {
 
 		setPaintOptions(); // set initial paint options
 
-		setNativeView(tiPaintView = new PaintView(proxy.getContext()));
-		
+		setNativeView(tiPaintView = new PaintView(proxy.getActivity()));
+
 		if (props.containsKeyAndNotNull("image")) {
 			tiPaintView.setImage(props.getString("image"));
 		}
 	}
-	
+
 	private void setPaintOptions() {
 		tiPaint = new Paint();
 		tiPaint.setAntiAlias(true);
@@ -129,10 +129,9 @@ public class UIPaintView extends TiUIView {
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			super.onSizeChanged(w, h, oldw, oldh);
 			if (tiImage != null) {
-				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy.getTiContext(), tiImage);
+				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
 				tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
-			}
-			else {
+			} else {
 				tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 			}
 			tiCanvas = new Canvas(tiBitmap);
@@ -222,7 +221,7 @@ public class UIPaintView extends TiUIView {
 				clear();
 			} else {
 				finalizePaths();
-				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy.getTiContext(), tiImage);
+				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
 				tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
 				tiCanvas = new Canvas(tiBitmap);
 				invalidate();
@@ -232,7 +231,7 @@ public class UIPaintView extends TiUIView {
 		public void clear() {
 			finalizePaths();
 			tiBitmap.eraseColor(Color.TRANSPARENT);
-			
+
 			invalidate();
 		}
 	}
