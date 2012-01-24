@@ -42,6 +42,11 @@
 	{
 		[drawImage setFrame:bounds];
 	}
+    
+    // MOD-348: Ensure that we get a solid box in which to draw. Otherwise, we'll end
+    // up with blurry lines and visual defects.
+    drawBox = CGRectMake(bounds.origin.x, bounds.origin.y,
+                            ceilf(bounds.size.width), ceilf(bounds.size.height));
 }
 
 - (UIImageView*)imageView
@@ -98,9 +103,7 @@
 
 - (void)drawFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
 {
-	UIView *view = [self imageView];
-	UIGraphicsBeginImageContext(view.frame.size);
-	[drawImage.image drawInRect:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
+	[drawImage.image drawInRect:CGRectMake(0, 0, drawBox.size.width, drawBox.size.height)];
     if (erase) {
         [self drawEraserLineFrom:lastPoint to:currentPoint];
     }
@@ -108,36 +111,38 @@
         [self drawSolidLineFrom:lastPoint to:currentPoint];
     }
     CGContextStrokePath(UIGraphicsGetCurrentContext());
-	drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
-	UIGraphicsEndImageContext();
+	
 	lastPoint = currentPoint;
+}
+
+- (void)drawTouches:(NSSet *)touches
+{
+    UIGraphicsBeginImageContext(drawBox.size);
+    
+    for (UITouch* touch in [touches allObjects]) {
+        [self drawFrom:[touch previousLocationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
+    }
+    drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
+    
+	UIGraphicsEndImageContext();
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
 {
 	[super touchesBegan:touches withEvent:event];
-	
-    for (UITouch* touch in [touches allObjects]) {
-        [self drawFrom:[touch locationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
-    }
+	[self drawTouches:touches];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event 
 {
 	[super touchesMoved:touches withEvent:event];
-	
-    for (UITouch* touch in [touches allObjects]) {
-        [self drawFrom:[touch previousLocationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
-    }
+	[self drawTouches:touches];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
 {
 	[super touchesEnded:touches withEvent:event];
-	
-    for (UITouch* touch in [touches allObjects]) {
-        [self drawFrom:[touch previousLocationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
-    }
+	[self drawTouches:touches];
 }
 
 #pragma mark Public APIs
