@@ -13,6 +13,7 @@
 	CGFloat strokeAlpha;
 	CGColorRef strokeColor;
 	bool erase;
+	CGRect drawBox;
 }
 
 @end
