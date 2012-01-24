@@ -10,7 +10,7 @@ package ti.modules.titanium.paint;
 
 import org.appcelerator.kroll.KrollDict;
 
-import org.appcelerator.titanium.util.Log;
+import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiC;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.util.TiConvert;
