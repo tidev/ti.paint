@@ -62,11 +62,6 @@
 
 - (void)drawSolidLineFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
 {
-    CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
-    CGContextSetLineWidth(UIGraphicsGetCurrentContext(), strokeWidth);
-    CGContextSetAlpha(UIGraphicsGetCurrentContext(), strokeAlpha);
-    CGContextSetStrokeColorWithColor(UIGraphicsGetCurrentContext(), strokeColor);
-    CGContextBeginPath(UIGraphicsGetCurrentContext());
     CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
     CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), currentPoint.x, currentPoint.y);
 }
@@ -110,18 +105,23 @@
     else {
         [self drawSolidLineFrom:lastPoint to:currentPoint];
     }
-    CGContextStrokePath(UIGraphicsGetCurrentContext());
-	
-	lastPoint = currentPoint;
 }
 
 - (void)drawTouches:(NSSet *)touches
 {
     UIGraphicsBeginImageContext(drawBox.size);
     
+    CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
+    CGContextSetLineWidth(UIGraphicsGetCurrentContext(), strokeWidth);
+    CGContextSetAlpha(UIGraphicsGetCurrentContext(), strokeAlpha);
+    CGContextSetStrokeColorWithColor(UIGraphicsGetCurrentContext(), strokeColor);
+    CGContextBeginPath(UIGraphicsGetCurrentContext());
+    
     for (UITouch* touch in [touches allObjects]) {
         [self drawFrom:[touch previousLocationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
     }
+    
+    CGContextStrokePath(UIGraphicsGetCurrentContext());
     drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
     
 	UIGraphicsEndImageContext();
