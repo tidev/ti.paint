@@ -151,12 +151,7 @@ public class UIPaintView extends TiUIView {
 		}
 
 		private void touch_start(int id, float x, float y) {
-			if (tiPaths[id] != null) {
-				tiCanvas.drawPath(tiPaths[id], tiPaint);
-				tiPaths[id].reset();
-			} else {
-				tiPaths[id] = new Path();
-			}
+			tiPaths[id] = new Path();
 			tiPaths[id].moveTo(x, y);
 			tiX[id] = x;
 			tiY[id] = y;
@@ -176,14 +171,15 @@ public class UIPaintView extends TiUIView {
 		public boolean onTouchEvent(MotionEvent mainEvent) {
 			for (int i = 0; i < mainEvent.getPointerCount(); i++) {
 				int id = mainEvent.getPointerId(i);
-				float x = mainEvent.getX(id);
-				float y = mainEvent.getY(id);
+				float x = mainEvent.getX(i);
+				float y = mainEvent.getY(i);
 				int action = mainEvent.getAction();
 				if (action > 6) {
 					action = (action % 256) - 5;
 				}
 				switch (action) {
 					case MotionEvent.ACTION_DOWN:
+						finalizePath(id);
 						touch_start(id, x, y);
 						invalidate();
 						break;
@@ -192,11 +188,8 @@ public class UIPaintView extends TiUIView {
 						invalidate();
 						break;
 					case MotionEvent.ACTION_UP:
-						if (eraseState) {
-							// When erasing, we need to be rather aggressive with finalizing the paths.
-							finalizePaths();
-							invalidate();
-						}
+						finalizePath(id);
+						invalidate();
 						break;
 				}
 			}
@@ -204,6 +197,14 @@ public class UIPaintView extends TiUIView {
 			return true;
 		}
 
+		public void finalizePath(int id) {
+			if (tiPaths[id] != null) {
+				tiCanvas.drawPath(tiPaths[id], tiPaint);
+				tiPaths[id].reset();
+				tiPaths[id] = null;
+			}
+		}
+		
 		public void finalizePaths() {
 			for (int i = 0; i < maxTouchPoints; i++) {
 				if (tiPaths[i] != null) {
