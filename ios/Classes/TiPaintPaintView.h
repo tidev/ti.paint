@@ -5,14 +5,12 @@
  * and licensed under the Apache Public License (version 2)
  */
 #import "TiUIView.h"
+#import "WetPaintView.h"
 
-@interface TiPaintPaintView : TiUIView {
+@interface TiPaintPaintView : TiUIView <WetPaintViewDelegate> {
 @private
 	UIImageView *drawImage;
-	CGFloat strokeWidth;
-	CGFloat strokeAlpha;
-	CGColorRef strokeColor;
-	bool erase;
+	WetPaintView *wetPaintView;
 	CGRect drawBox;
 }
 

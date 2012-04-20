@@ -1,5 +1,12 @@
 # Change Log
 <pre>
+v1.3	Rewrote rendering algorithm to allow for a number of enhancements:
+		- Retina display support [MOD-636]
+		- Fix erratic sharpening of previous drawings [MOD-635]
+		- Smooth erasing identical to how Paint behaves on Android
+		- Improved multi-touch drawing performance
+		- Quadratic smoothing of lines
+
 v1.2	Fixed percent width visual defects [MOD-348]
 		Improved multi-touch drawing performance
 
