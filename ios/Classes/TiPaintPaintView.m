@@ -11,163 +11,102 @@
 
 - (id)init
 {
-	if ((self = [super init]))
-	{
-		strokeWidth = 5;
-        strokeAlpha = 1;
-		strokeColor = CGColorRetain([[TiUtils colorValue:@"#000"] _color].CGColor);
+    if ((self = [super init]))
+    {
         self.multipleTouchEnabled = YES;
-	}
-	return self;
+        wetPaintView = [[WetPaintView alloc] initWithFrame:self.bounds];
+        wetPaintView.delegate = self;
+        [self addSubview:wetPaintView];
+        [self bringSubviewToFront:wetPaintView];
+    }
+    return self;
 }
 
 -(BOOL)proxyHasTapListener
 {
     // The TiUIView only sets multipleTouchEnabled to YES if we have a tap listener.
     // So... let's make it think that we do! (Note that we don't actually need one.)
-	return YES;
+    return YES;
 }
 
 - (void)dealloc
 {
-	RELEASE_TO_NIL(drawImage);
-	CGColorRelease(strokeColor);
-	[super dealloc];
+    [wetPaintView removeFromSuperview];
+    RELEASE_TO_NIL(wetPaintView);
+    RELEASE_TO_NIL(drawImage);
+    [super dealloc];
 }
 
 - (void)frameSizeChanged:(CGRect)frame bounds:(CGRect)bounds
 {
-	[super frameSizeChanged:frame bounds:bounds];
-	if (drawImage!=nil)
-	{
-		[drawImage setFrame:bounds];
-	}
+    [super frameSizeChanged:frame bounds:bounds];
+    [wetPaintView setFrame:bounds];
+    if (drawImage != nil)
+    {
+        [drawImage setFrame:bounds];
+    }
     
     // MOD-348: Ensure that we get a solid box in which to draw. Otherwise, we'll end
     // up with blurry lines and visual defects.
     drawBox = CGRectMake(bounds.origin.x, bounds.origin.y,
-                            ceilf(bounds.size.width), ceilf(bounds.size.height));
+                         ceilf(bounds.size.width), ceilf(bounds.size.height));
 }
+
+#pragma mark Utility
 
 - (UIImageView*)imageView
 {
-	if (drawImage==nil)
-	{
-		drawImage = [[UIImageView alloc] initWithImage:nil];
-		drawImage.frame = [self bounds];
-		[self addSubview:drawImage];
-	}
-	return drawImage;
-}
-
-- (void)drawSolidLineFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
-{
-    CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
-    CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), currentPoint.x, currentPoint.y);
-}
-
-- (void)drawEraserLineFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
-{
-    // This is an implementation of Bresenham's line algorithm
-    int x0 = currentPoint.x, y0 = currentPoint.y;
-    int x1 = lastPoint.x, y1 = lastPoint.y;
-    int dx = abs(x0-x1), dy = abs(y0-y1);
-    int sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-    int err = dx - dy, e2;
-    
-    while(true)
+    if (drawImage == nil)
     {
-        CGContextClearRect(UIGraphicsGetCurrentContext(), CGRectMake(x0, y0, strokeWidth, strokeWidth));
-        if (x0 == x1 && y0 == y1)
-        {
-            break;
-        }
-        e2 = 2 * err;
-        if (e2 > -dy)
-        {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx)
-        {
-            err += dx;
-            y0 += sy;
-        }
+        drawImage = [[UIImageView alloc] initWithImage:nil];
+        drawImage.frame = [self bounds];
+        [self addSubview:drawImage];
+        [self bringSubviewToFront:wetPaintView];
     }
+    return drawImage;
 }
 
-- (void)drawFrom:(CGPoint)lastPoint to:(CGPoint)currentPoint
+#pragma mark Wet Paint View Delegate
+
+-(void)readyToSavePaint
 {
-	[drawImage.image drawInRect:CGRectMake(0, 0, drawBox.size.width, drawBox.size.height)];
-    if (erase) {
-        [self drawEraserLineFrom:lastPoint to:currentPoint];
+    char majorVersion = [[[UIDevice currentDevice] systemVersion] characterAtIndex:0];
+    if (majorVersion == '2' || majorVersion == '3') {
+        UIGraphicsBeginImageContext(drawBox.size);
     }
     else {
-        [self drawSolidLineFrom:lastPoint to:currentPoint];
+        UIGraphicsBeginImageContextWithOptions(drawBox.size, NO, 0.0);
     }
-}
-
-- (void)drawTouches:(NSSet *)touches
-{
-    UIGraphicsBeginImageContext(drawBox.size);
-    
-    CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
-    CGContextSetLineWidth(UIGraphicsGetCurrentContext(), strokeWidth);
-    CGContextSetAlpha(UIGraphicsGetCurrentContext(), strokeAlpha);
-    CGContextSetStrokeColorWithColor(UIGraphicsGetCurrentContext(), strokeColor);
-    CGContextBeginPath(UIGraphicsGetCurrentContext());
-    
-    for (UITouch* touch in [touches allObjects]) {
-        [self drawFrom:[touch previousLocationInView:[self imageView]] to:[touch locationInView:[self imageView]]];
-    }
-    
-    CGContextStrokePath(UIGraphicsGetCurrentContext());
-    drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
-    
-	UIGraphicsEndImageContext();
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
-{
-	[super touchesBegan:touches withEvent:event];
-	[self drawTouches:touches];
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event 
-{
-	[super touchesMoved:touches withEvent:event];
-	[self drawTouches:touches];
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
-{
-	[super touchesEnded:touches withEvent:event];
-	[self drawTouches:touches];
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    [[self imageView].image drawInRect:CGRectMake(0, 0, drawBox.size.width, drawBox.size.height)];
+    [wetPaintView drawInContext:context andApplyErase:YES];
+    [self imageView].image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 }
 
 #pragma mark Public APIs
 
 - (void)setEraseMode_:(id)value
 {
-	erase = [TiUtils boolValue:value];
+    wetPaintView.erase = [TiUtils boolValue:value];
 }
 
 - (void)setStrokeWidth_:(id)width
 {
-	strokeWidth = [TiUtils floatValue:width];
+    wetPaintView.strokeWidth = [TiUtils floatValue:width];
 }
 
 - (void)setStrokeColor_:(id)value
 {
-	CGColorRelease(strokeColor);
-	TiColor *color = [TiUtils colorValue:value];
-	strokeColor = [color _color].CGColor;
-	CGColorRetain(strokeColor);
+    CGColorRelease(wetPaintView.strokeColor);
+    TiColor *color = [TiUtils colorValue:value];
+    wetPaintView.strokeColor = [color _color].CGColor;
+    CGColorRetain(wetPaintView.strokeColor);
 }
 
 - (void)setStrokeAlpha_:(id)alpha
 {
-    strokeAlpha = [TiUtils floatValue:alpha] / 255.0;
+    wetPaintView.strokeAlpha = [TiUtils floatValue:alpha] / 255.0;
 }
 
 - (void)setImage_:(id)value
@@ -179,6 +118,7 @@
         drawImage = [[UIImageView alloc] initWithImage:image];
         drawImage.frame = [self bounds];
         [self addSubview:drawImage];
+        [self bringSubviewToFront:wetPaintView];
         UIView *view = [self imageView];
         [drawImage.image drawInRect:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
     }
@@ -186,10 +126,10 @@
 
 - (void)clear:(id)args
 {
-	if (drawImage!=nil)
-	{
-		drawImage.image = nil;
-	}
+    if (drawImage != nil)
+    {
+        drawImage.image = nil;
+    }
 }
 
 @end
