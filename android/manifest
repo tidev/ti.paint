@@ -15,4 +15,4 @@ name: paint
 moduleid: ti.paint
 guid: de06ebe1-4ab9-44da-85e4-7409b24190eb
 platform: android
-minsdk: 2.1.3.GA
+minsdk: 3.2.2.GA
