@@ -4,7 +4,7 @@
 #
 version: 1.31
 apiversion: 2
-architectures: armv7 i386 arm64
+architectures: armv7 i386 x86_64 arm64
 description: Provides a paint surface user interface view.
 author: Jeff Haynie 
 license: Appcelerator Commercial License 
