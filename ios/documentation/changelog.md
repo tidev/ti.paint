@@ -1,5 +1,7 @@
 # Change Log
 <pre>
+v1.4.0 	Updated project with 64bit binary support [TIMOB-18092]
+
 v1.3	Rewrote rendering algorithm to allow for a number of enhancements:
 		- Retina display support [MOD-636]
 		- Fix erratic sharpening of previous drawings [MOD-635]
