@@ -44,5 +44,21 @@ buttonStrokeColorEraser.addEventListener('click', function(e) {
 });
 win.add(buttonStrokeColorEraser);
 
+paintView.addEventListener('touchcancel', function(e){
+    console.log('touchcancel event fired.');
+});
+
+paintView.addEventListener('touchend', function(e){
+    console.log('touchend event fired.');
+});
+
+paintView.addEventListener('touchmove', function(e){
+    console.log('touchmove event fired.');
+});
+
+paintView.addEventListener('touchstart', function(e){
+    console.log('touchstart event fired.');
+});
+
 win.open();
 
