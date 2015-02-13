@@ -1,5 +1,7 @@
 # Change Log
 <pre>
+v1.4.1 	Added support for touchstart, touchend, touchcancel, touchmove [MOD-2070]
+
 v1.4.0 	Updated project with 64bit binary support [TIMOB-18092]
 
 v1.3	Rewrote rendering algorithm to allow for a number of enhancements:
