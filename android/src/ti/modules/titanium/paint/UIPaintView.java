@@ -59,7 +59,7 @@ public class UIPaintView extends TiUIView {
 	public void setStrokeWidth(Float width) {
 		Log.d(LCAT, "Changing stroke width.");
 		tiPaintView.finalizePaths();
-		tiPaint.setStrokeWidth(width);
+		tiPaint.setStrokeWidth(TiConvert.toFloat(width));
 		tiPaint.setAlpha(alphaState);
 	}
 
