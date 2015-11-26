@@ -1,5 +1,7 @@
 # Change Log
 <pre>
+v2.0.2  [MOD-2167] Recompiled binary for Android 6.0 support
+
 v2.0.2	Building with 2.1.3.GA to support x86 devices
 	
 v2.0.1	Fixed a couple multi-touch scenarios that were drawing erratic lines [MOD-638]
