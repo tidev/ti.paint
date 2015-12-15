@@ -19,7 +19,8 @@
 @end
 
 @interface WetPaintView : UIView {
-    CFMutableDictionaryRef _touchLines;
+    NSMutableArray *prop;
+    
 }
 
 @property CGFloat strokeWidth;
@@ -28,6 +29,8 @@
 @property bool erase;
 @property (nonatomic, assign) id<WetPaintViewDelegate> delegate;
 
+
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase;
+-(CGPoint)createPoint:(int)index;
 
 @end

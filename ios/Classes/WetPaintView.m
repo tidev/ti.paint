@@ -32,7 +32,7 @@
         strokeWidth = 5;
         strokeAlpha = 1;
 		strokeColor = CGColorRetain([[TiUtils colorValue:@"#000"] _color].CGColor);
-        _touchLines = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+        prop = [[[NSMutableArray alloc] init]retain];
         self.opaque = NO;
         self.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
     }
@@ -41,9 +41,8 @@
 
 - (void)dealloc
 {
-    CFDictionaryRemoveAllValues(_touchLines);
-    _touchLines = NULL;
 	CGColorRelease(strokeColor);
+    RELEASE_TO_NIL(prop);
 	[super dealloc];
 }
 
@@ -51,21 +50,23 @@
 
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase {
     CGContextSetLineCap(context, kCGLineCapRound);
-    CGContextSetLineWidth(context, strokeWidth);
+    //CGContextSetLineWidth(context, strokeWidth);
     CGContextSetStrokeColorWithColor(context, strokeColor);
     if (!erase) {
         CGContextSetAlpha(context, strokeAlpha);
         CGContextSetBlendMode(context, kCGBlendModeNormal);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        CGContextSetLineJoin (context, kCGLineJoinRound);
+        //CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        [self drawPoints:context];
     }
     else if (applyErase) {
         CGContextSetBlendMode(context, kCGBlendModeClear);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        [self drawPoints:context];
     }
     else {
         CGContextSetAlpha(context, 1); // Erasing does not respect alpha, unfortunately.
         CGContextSetStrokeColorWithColor(context, [[TiUtils colorValue:@"#000"] _color].CGColor);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        [self drawPoints:context];
     }
 }
 
@@ -80,26 +81,40 @@
 
 #pragma mark Drawing Utility
 
-static void drawPoints(const void* key, const void* value, void* ctx)
+
+- (void)drawPoints:(CGContextRef)context
 {
-    CGContextRef context = ctx;
-    NSMutableArray* points = (NSMutableArray*)value;
-    if (points == nil || [points count] == 0) {
+    CGContextRef _context = context;
+    if (prop == nil || [prop count] == 0) {
         return;
     }
-    CGPoint first = [[points objectAtIndex:0] CGPointValue];
-    CGContextBeginPath(context);
-    CGContextMoveToPoint(context, first.x, first.y);
-    NSValue* lastValue = nil;
-    for (NSValue* value in points) {
-        CGPoint point = [value CGPointValue];
-        if (lastValue != nil) {
-            CGPoint lastPoint = [lastValue CGPointValue];
-            CGContextAddQuadCurveToPoint(context, lastPoint.x, lastPoint.y, (point.x + lastPoint.x) / 2, (point.y + lastPoint.y) / 2);
+    
+    CGContextBeginPath(_context);
+    CGPoint lastPoint = CGPointMake(0, 0);
+    
+    for (int i = 0; i < [prop count];i++) {
+        
+        if (lastPoint.x != 0 || lastPoint.y != 0) {
+            
+            NSMutableDictionary *tempDict = [prop objectAtIndex:i];
+            CGPoint point = [self createPoint:i];
+            CGContextMoveToPoint(_context,lastPoint.x, lastPoint.y);
+            CGContextAddLineToPoint(_context, point.x, point.y);
+            strokeWidth = [TiUtils floatValue:[tempDict valueForKey:@"force"]];
+            CGContextSetLineWidth(_context,strokeWidth);
+            CGContextStrokePath(_context);
         }
-        lastValue = value;
+        lastPoint = [self createPoint:i];
     }
-    CGContextStrokePath(context);
+    CGContextStrokePath(_context);
+}
+
+-(CGPoint)createPoint:(int)index {
+    
+    NSMutableDictionary *getReturnPoint = [NSMutableDictionary dictionaryWithDictionary:[prop objectAtIndex:index]];
+    CGPoint retunPoint = CGPointMake([TiUtils floatValue:[getReturnPoint valueForKey:@"x"]], [TiUtils floatValue:[getReturnPoint valueForKey:@"y"]]);;
+    //RELEASE_TO_NIL(getReturnPoint);
+    return retunPoint;
 }
 
 #pragma mark Touch Delegate
@@ -107,10 +122,7 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
 {
     for (UITouch* touch in [touches allObjects]) {
-        CGPoint point = [touch locationInView:self];
-        NSValue* value = [NSValue valueWithCGPoint:point];
-        NSMutableArray* points = [[NSMutableArray arrayWithObject:value] retain];
-        CFDictionarySetValue(_touchLines, touch, points);
+        [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
     }
 	[super touchesBegan:touches withEvent:event];
 }
@@ -118,20 +130,17 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event 
 {
 	for (UITouch* touch in [touches allObjects]) {
-        NSMutableArray* points = (NSMutableArray*)CFDictionaryGetValue(_touchLines, touch);
-        CGPoint point = [touch locationInView:self];
-        NSValue* value = [NSValue valueWithCGPoint:point];
-        [points addObject:value];
+        
+        [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
     }
+    
     [self setNeedsDisplay];
 	[super touchesMoved:touches withEvent:event];
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    for (UITouch* touch in [touches allObjects]) {
-        CFDictionaryRemoveValue(_touchLines, touch);
-    }
+    [prop removeAllObjects];
     [self setNeedsDisplay];
     [super touchesCancelled:touches withEvent:event];
 }
@@ -139,19 +148,15 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
 {
     for (UITouch* touch in [touches allObjects]) {
-        NSMutableArray* points = (NSMutableArray*)CFDictionaryGetValue(_touchLines, touch);
-        CGPoint point = [touch locationInView:self];
-        NSValue* value = [NSValue valueWithCGPoint:point];
-        [points addObject:value];
+        [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
     }
     
     if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {
         [delegate readyToSavePaint];
     }
     
-    for (UITouch* touch in [touches allObjects]) {
-        CFDictionaryRemoveValue(_touchLines, touch);
-    }
+    [prop removeAllObjects];
+    
     [self setNeedsDisplay];
 	[super touchesEnded:touches withEvent:event];
 }
