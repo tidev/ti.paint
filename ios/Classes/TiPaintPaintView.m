@@ -93,7 +93,25 @@
 
 - (void)setStrokeWidth_:(id)width
 {
+    if ([TiUtils forceTouchSupported]&&[wetPaintView strokeForce] == YES) {
+        NSLog(@"Cannot set strokeWidth.Please ensure you're using a force supported device and strokeForce is turned off");
+        return;
+    }
     wetPaintView.strokeWidth = [TiUtils floatValue:width];
+}
+
+- (void)setWidthModifier_:(id)width
+{
+    if ([TiUtils isIOS9OrGreater]) {
+        wetPaintView.widthModifier = [TiUtils floatValue:width];
+        return;
+    }
+    NSLog(@"This property is only available for iOS9 or later")
+}
+
+-(void)setUseForce_:(id)value
+{
+    wetPaintView.strokeForce = [TiUtils boolValue:value];
 }
 
 - (void)setStrokeColor_:(id)value

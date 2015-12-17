@@ -24,9 +24,11 @@
 }
 
 @property CGFloat strokeWidth;
+@property bool strokeForce;
 @property CGFloat strokeAlpha;
 @property CGColorRef strokeColor;
 @property bool erase;
+@property CGFloat widthModifier;
 @property (nonatomic, assign) id<WetPaintViewDelegate> delegate;
 
 

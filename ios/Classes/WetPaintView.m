@@ -17,9 +17,11 @@
 #pragma mark Properties
 
 @synthesize strokeAlpha;
+@synthesize strokeForce;
 @synthesize strokeWidth;
 @synthesize strokeColor;
 @synthesize erase;
+@synthesize widthModifier;
 @synthesize delegate;
 
 #pragma mark Lifecycle
@@ -31,8 +33,10 @@
         self.multipleTouchEnabled = YES;
         strokeWidth = 5;
         strokeAlpha = 1;
+        strokeForce = true;
 		strokeColor = CGColorRetain([[TiUtils colorValue:@"#000"] _color].CGColor);
         prop = [[[NSMutableArray alloc] init]retain];
+        widthModifier = 1;
         self.opaque = NO;
         self.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
     }
@@ -100,7 +104,9 @@
             CGPoint point = [self createPoint:i];
             CGContextMoveToPoint(_context,lastPoint.x, lastPoint.y);
             CGContextAddLineToPoint(_context, point.x, point.y);
-            strokeWidth = [TiUtils floatValue:[tempDict valueForKey:@"force"]];
+            if ([TiUtils forceTouchSupported] && strokeForce) {
+            strokeWidth = [TiUtils floatValue:[tempDict valueForKey:@"force"]]*widthModifier;
+            }
             CGContextSetLineWidth(_context,strokeWidth);
             CGContextStrokePath(_context);
         }
@@ -133,7 +139,6 @@
         
         [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
     }
-    
     [self setNeedsDisplay];
 	[super touchesMoved:touches withEvent:event];
 }
@@ -154,9 +159,7 @@
     if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {
         [delegate readyToSavePaint];
     }
-    
     [prop removeAllObjects];
-    
     [self setNeedsDisplay];
 	[super touchesEnded:touches withEvent:event];
 }
