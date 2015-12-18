@@ -11,6 +11,9 @@
  */
 
 #import "WetPaintView.h"
+#import "TiPaintPaintViewProxy.h"
+#import "TiUIView.h"
+
 
 @implementation WetPaintView
 
@@ -119,7 +122,6 @@
     
     NSMutableDictionary *getReturnPoint = [NSMutableDictionary dictionaryWithDictionary:[prop objectAtIndex:index]];
     CGPoint retunPoint = CGPointMake([TiUtils floatValue:[getReturnPoint valueForKey:@"x"]], [TiUtils floatValue:[getReturnPoint valueForKey:@"y"]]);;
-    //RELEASE_TO_NIL(getReturnPoint);
     return retunPoint;
 }
 
@@ -127,24 +129,41 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
 {
-    for (UITouch* touch in [touches allObjects]) {
+        UITouch* touch = [touches anyObject];
         [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
+
+    if ([[self proxy]_hasListeners:@"touchstart"]) {
+        NSDictionary *evt = [TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]];
+        [[self proxy] fireEvent:@"touchstart" withObject:evt];
     }
+    
 	[super touchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event 
 {
 	for (UITouch* touch in [touches allObjects]) {
-        
         [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
     }
+    
+    if ([[self proxy]_hasListeners:@"touchmove"]) {
+        UITouch* touch = [touches anyObject];
+        NSDictionary *evt = [TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]];
+        [[self proxy] fireEvent:@"touchmove" withObject:evt];
+    }
+
     [self setNeedsDisplay];
 	[super touchesMoved:touches withEvent:event];
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    if ([[self proxy]_hasListeners:@"touchcancel"]) {
+        UITouch* touch = [touches anyObject];
+        NSDictionary *evt = [TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]];
+        [[self proxy] fireEvent:@"touchcancel" withObject:evt];
+    }
+    
     [prop removeAllObjects];
     [self setNeedsDisplay];
     [super touchesCancelled:touches withEvent:event];
@@ -152,8 +171,13 @@
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event 
 {
-    for (UITouch* touch in [touches allObjects]) {
-        [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
+    UITouch* touch = [touches anyObject];
+    [prop addObject:[TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]]];
+
+    if ([[self proxy]_hasListeners:@"touchend"]) {
+        UITouch* touch = [touches anyObject];
+        NSDictionary *evt = [TiUtils touchPropertiesToDictionary:touch andPoint:[touch locationInView:self]];
+        [[self proxy] fireEvent:@"touchend" withObject:evt];
     }
     
     if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {

@@ -12,6 +12,7 @@
 
 #import <UIKit/UIKit.h>
 #import "TiUtils.h"
+#import "TiUIView.h"
 
 @protocol WetPaintViewDelegate <NSObject>
 @optional
@@ -22,7 +23,7 @@
     NSMutableArray *prop;
     
 }
-
+@property (nonatomic ,assign) TiProxy*proxy;
 @property CGFloat strokeWidth;
 @property bool strokeForce;
 @property CGFloat strokeAlpha;
