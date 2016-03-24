@@ -59,9 +59,10 @@ public class UIPaintView extends TiUIView {
 	public void setStrokeWidth(Float width) {
 		Log.d(LCAT, "Changing stroke width.");
 		tiPaintView.finalizePaths();
-		tiPaint.setStrokeWidth(width);
+		tiPaint.setStrokeWidth(TiConvert.toFloat(width));
 		tiPaint.setAlpha(alphaState);
 	}
+
 
 	public void setEraseMode(Boolean toggle) {
 		eraseState = toggle;
@@ -126,14 +127,23 @@ public class UIPaintView extends TiUIView {
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			super.onSizeChanged(w, h, oldw, oldh);
-			if (tiImage != null) {
-				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
-				tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
-			} else {
-				tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+
+			if(tiBitmap == null){
+				if (tiImage != null) {
+					TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
+					tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
+				} else {
+					tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+				}
+				tiCanvas = new Canvas(tiBitmap);
 			}
-			tiCanvas = new Canvas(tiBitmap);
+			else {		
+				tiBitmap = Bitmap.createScaledBitmap(tiBitmap, w, h, true);
+				tiCanvas = new Canvas(tiBitmap);			
+			}
+
 		}
+
 
 		@Override
 		protected void onDraw(Canvas canvas) {
