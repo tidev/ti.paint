@@ -12,6 +12,7 @@
 
 #import <UIKit/UIKit.h>
 #import "TiUtils.h"
+#import "TiUIView.h"
 
 @protocol WetPaintViewDelegate <NSObject>
 @optional
@@ -19,15 +20,20 @@
 @end
 
 @interface WetPaintView : UIView {
-    CFMutableDictionaryRef _touchLines;
+    NSMutableArray *prop;
+    
 }
-
+@property (nonatomic ,assign) TiProxy*proxy;
 @property CGFloat strokeWidth;
+@property bool strokeForce;
 @property CGFloat strokeAlpha;
 @property CGColorRef strokeColor;
 @property bool erase;
+@property CGFloat widthModifier;
 @property (nonatomic, assign) id<WetPaintViewDelegate> delegate;
 
+
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase;
+-(CGPoint)createPoint:(int)index;
 
 @end

@@ -21,7 +21,11 @@
     }
     return self;
 }
-
+-(void)setProxy:(TiProxy *)proxy
+{
+    wetPaintView.proxy = proxy;
+    [super setProxy:proxy];
+}
 -(BOOL)proxyHasTapListener
 {
     // The TiUIView only sets multipleTouchEnabled to YES if we have a tap listener.
@@ -93,7 +97,26 @@
 
 - (void)setStrokeWidth_:(id)width
 {
+    if ([TiUtils forceTouchSupported]&&[wetPaintView strokeForce] == YES) {
+        NSLog(@"Cannot set strokeWidth.Please ensure you're using a force supported device and strokeForce is turned off");
+        [self setWidthModifier_:width];
+        return;
+    }
     wetPaintView.strokeWidth = [TiUtils floatValue:width];
+}
+
+- (void)setWidthModifier_:(id)width
+{
+    if ([TiUtils isIOS9OrGreater]) {
+        wetPaintView.widthModifier = [TiUtils floatValue:width];
+        return;
+    }
+    NSLog(@"This property is only available for iOS9 or later")
+}
+
+-(void)setUseForce_:(id)value
+{
+    wetPaintView.strokeForce = [TiUtils boolValue:value];
 }
 
 - (void)setStrokeColor_:(id)value
@@ -106,7 +129,11 @@
 
 - (void)setStrokeAlpha_:(id)alpha
 {
-    wetPaintView.strokeAlpha = [TiUtils floatValue:alpha] / 255.0;
+    if ([TiUtils floatValue:alpha] > 1) {
+        NSLog(@"Please enter a value between 0-1");
+        return;
+    }
+    wetPaintView.strokeAlpha = [TiUtils floatValue:alpha];
 }
 
 - (void)setImage_:(id)value

@@ -1,0 +1,375 @@
+---
+name: Modules.Paint
+summary: Add-on paint module
+description: |
+    ## Android
+
+    This module is a simple view with the ability to trace the location of the touch and render a trail.
+
+    ## iOS
+    This module is a simple view with the ability to trace the location of the touch and render a trail.
+    If using a 3D-Touch supported deivce (6s and later) with iOS 9 or later, the paintView will support
+    all the new properties. For example the line thickness will differ depending on the force of the
+    touch.
+
+
+examples:
+  - title: PreviewContext example using a Button as receiver.
+    example: |
+            var Paint = require('ti.paint');
+            var win = Ti.UI.createWindow({ backgroundColor: '#fff' });
+            var win2 = Ti.UI.createWindow({ backgroundColor: 'white' });
+
+            var paintView = Paint.createPaintView({
+                top 			:0,
+                right 			:0,
+                bottom 			:80,
+                left 			:0,
+                strokeColor 	:'black',
+                strokeAlpha 	:255,
+                eraseMode 		:false
+            });
+            win.add(paintView);
+
+
+            var changeColor = Ti.UI.createButton({
+                bottom 	:80,
+                left 	:10,
+                width 	:Ti.UI.SIZE,
+                height 	:Ti.UI.SIZE,
+                title 	:'changeColor'
+            });
+
+            changeColor.addEventListener("click",function(e){
+                var string = "";
+                var textArea = Ti.UI.createTextArea({
+                borderWidth 	: 2,
+                borderColor 	: '#bbb',
+                borderRadius 	: 5,
+                color 			: '#888',
+                font 			: {fontSize:20, fontWeight:'bold'},
+                keyboardType 	: Ti.UI.KEYBOARD_TYPE_DEFAULT,
+                returnKeyType 	: Ti.UI.RETURNKEY_GO,
+                editable 		: true
+            });
+
+            win.add(textArea);
+            textArea.addEventListener("blur",function(e){
+                string = e.value;
+                paintView.strokeColor = string;
+                win.remove(textArea);
+
+                });
+            });
+
+            win.add(changeColor);
+
+            var clear = Ti.UI.createButton({
+                bottom:40,
+                left:140,
+                width:95,
+                height:30,
+                title:'Clear'
+            });
+            clear.addEventListener('click', function() {
+                paintView.clear();
+            });
+            win.add(clear);
+
+            var buttonStrokeAlpha = Ti.UI.createButton({
+                bottom 	:70,
+                right 	:10,
+                width 	:100,
+                height 	:30,
+                title 	:'Alpha : 100%'
+            });
+
+            buttonStrokeAlpha.addEventListener('click', function(e) {
+                paintView.strokeAlpha = 1.5;
+            });
+            win.add(buttonStrokeAlpha);
+
+            var buttonStrokeColorEraser = Ti.UI.createButton({
+                bottom 	:40,
+                right 	:10,
+                width 	:100,
+                height 	:30,
+                title:'Erase : Off' });
+
+            buttonStrokeColorEraser.addEventListener('click', function(e) {
+                paintView.eraseMode = (paintView.eraseMode) ? false : true;
+                e.source.title = (paintView.eraseMode) ? 'Erase : On' : 'Erase : Off';
+            });
+
+            var width = Ti.UI.createButton({
+                bottom 	:40,
+                left 	:10,
+                width 	:Ti.UI.SIZE,
+                height 	:30,
+                title 	:'setwidthModifier'
+            });
+
+            width.addEventListener('click', function() { paintView.widthModifier = 2; });
+            win.add(width);
+
+            var saveBtn = Ti.UI.createButton({
+                bottom 	:70,
+                left 	:140,
+                width 	:95,
+                height 	:30,
+                title 	:'save'
+            });
+
+            saveBtn.addEventListener('click', function() {
+            var sigImg = paintView.toImage(null,false);
+            var filename = ("Test_signature.bmp");
+
+            var label = Ti.UI.createLabel({
+                backgroundImage	: sigImg,
+                title 			: 'Click me!',
+                center 			: 10,
+                width 			: 100,
+                height			: 100,
+                borderColor 	:"black",
+                borderRadius 	:2
+            });
+
+            win2.add(label);
+            win2.open();
+            win.close();
+            });
+            win.add(saveBtn)
+            win.add(buttonStrokeColorEraser);
+            win.open();
+
+
+extends: Titanium.Module
+platforms: [android, iphone, ipad]
+excludes:
+events: [dblclick, doubletap, focus, keypressed, longclick, longpress, pinch, postlayout,
+        singletap, swipe,twofingertap]
+properties: [bubbleParent]
+
+properties:
+  - name: strokeWidth
+    summary: |
+        Used to set the width of the strokes. This method doesn't apply if the device
+        is 3D-Touch supported and strokeForce is enabled.The widthModifier will be set
+        instead.
+    type: Number
+    platforms: [android,iphone,ipad]
+
+  - name: strokeColor
+    summary: Sets the color of the strokes.
+    type: String
+    platforms: [android,iphone,ipad]
+
+  - name: strokeAlpha
+    summary: Sets the alpha channel of the stroke. Must be a value between 0-1.
+    type: String
+    platforms: [android,iphone,ipad]
+
+  - name: eraseMode
+    summary: Determines if the strokes will be rendered upon touchEnd or delete any strokes overlapping.
+    type: Boolean
+    platforms: [android,iphone,ipad]
+
+  - name: image
+    summary: Loads an image (by its URL) directly in to the paint view so that it can be drawn on and erased.
+    type: Boolean
+    platforms: [android,iphone,ipad]
+
+  - name: widthModifier
+    summary: |
+        This property is only available on devices that support 3D-Touch and are running iOS 9
+        or later.Modifies the maximum and minimum width of the strokes , by multiplying the force
+        property with the value passed in.
+    type: Number
+    platforms: [iphone,ipad]
+
+  - name: useForce
+    summary: Allows/disallows the force property to determine the width of the strokes.
+    type: Number
+    platforms: [iphone,ipad]
+
+methods:
+  - name: toImage
+    summary: Returns an image of the rendered view, as a Blob.
+    description: |
+        The `honorScaleFactor` method is only supported on iOS.
+    returns:
+        type: Titanium.Blob
+    platforms: [android, iphone, ipad]
+    parameters:
+      - name: callback
+        summary: |
+            Function to be invoked upon completion. If non-null, this method will be performed
+            asynchronously. If null, it will be performed immediately.
+        type: Callback<Titanium.Blob>
+        optional: true
+
+      - name: honorScaleFactor
+        summary: |
+            Determines whether the image is scaled based on scale factor of main screen. (iOS only)
+
+            When set to true, image is scale factor is honored. When set to false, the image in the
+            blob has the same dimensions for retina and non-retina devices.
+        type: Boolean
+        default: false
+        optional: true
+
+extends: Titanium.Proxy
+
+events:
+  - name: touchcancel
+    summary: Fired when a touch event is interrupted by the device.
+    description: |
+        A touchcancel can happen in circumstances such as an incoming call to allow the
+        UI to clean up state.
+    properties:
+      - name: x
+        summary: X coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: y
+        summary: Y coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: force
+        summary: |
+            The current force value of the touch event.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: maximumPossibleForce
+        summary: |
+            The maximum possible value the force property can be.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: altitudeAngle
+        summary: |
+            A value which indicates the stylus angle on the screen. If the stylus is perpendicular to the screen or no stylus is
+            being used, the value will be Pi/2. If the stylus is parallel to the screen, the value will be 0.
+            Note: This property is only available for IOS devices that support 3D-Touch and are 9.1 or later.
+        type: Number
+
+      - name: timestamp
+        summary: |
+            The time in seconds, of when the touch was used in correlation with the system start up.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+  - name: touchend
+    summary: Fired when a touch event is completed.
+    description: |
+        On the Android platform, other gesture events, such as `longpress` or `swipe`, cancel touch
+        events, so this event may not be triggered after a `touchstart` event.
+    properties:
+      - name: x
+        summary: X coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: y
+        summary: Y coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: force
+        summary: |
+            The current force value of the touch event.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: maximumPossibleForce
+        summary: |
+            The maximum possible value the force property can be.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: altitudeAngle
+        summary: |
+            A value which indicates the stylus angle on the screen. If the stylus is perpendicular to the screen or no stylus is
+            being used, the value will be Pi/2. If the stylus is parallel to the screen, the value will be 0.
+            Note: This property is only available for IOS devices that support 3D-Touch and are 9.1 or later.
+        type: Number
+
+      - name: timestamp
+        summary: |
+            The time in seconds, of when the touch was used in correlation with the system start up.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+  - name: touchmove
+    summary: Fired as soon as the device detects movement of a touch.
+    description: |
+        Event coordinates are always relative to the view in which the initial touch occurred
+    properties:
+      - name: x
+        summary: X coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: y
+        summary: Y coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: force
+        summary: |
+            The current force value of the touch event.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: maximumPossibleForce
+        summary: |
+            The maximum possible value the force property can be.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: altitudeAngle
+        summary: |
+            A value which indicates the stylus angle on the screen. If the stylus is perpendicular to the screen or no stylus is
+            being used, the value will be Pi/2. If the stylus is parallel to the screen, the value will be 0.
+            Note: This property is only available for IOS devices that support 3D-Touch and are 9.1 or later.
+        type: Number
+
+      - name: timestamp
+        summary: |
+            The time in seconds, of when the touch was used in correlation with the system start up.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+  - name: touchstart
+    summary: Fired as soon as the device detects a touch gesture.
+    properties:
+      - name: x
+        summary: X coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: y
+        summary: Y coordinate of the event from the `source` view's coordinate system.
+        type: Number
+
+      - name: force
+        summary: |
+            The current force value of the touch event.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: maximumPossibleForce
+        summary: |
+            The maximum possible value the force property can be.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
+      - name: altitudeAngle
+        summary: |
+            A value which indicates the stylus angle on the screen. If the stylus is perpendicular to the screen or no stylus is
+            being used, the value will be Pi/2. If the stylus is parallel to the screen, the value will be 0.
+            Note: This property is only available for IOS devices that support 3D-Touch and are 9.1 or later.
+        type: Number
+
+      - name: timestamp
+        summary: |
+            The time in seconds, of when the touch was used in correlation with the system start up.
+            Note: This property is only available for iOS devices that support 3D-Touch and run 9.0 or later.
+        type: Number
+
