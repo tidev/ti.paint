@@ -132,4 +132,24 @@
     }
 }
 
+#pragma mark Event Handlers
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
+    [self.proxy fireEvent:@"touchend"];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.proxy fireEvent:@"touchstart"];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.proxy fireEvent:@"touchmove"];
+}
+
+- (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.proxy fireEvent:@"touchcancel"];
+}
+
 @end
