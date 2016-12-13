@@ -2,13 +2,13 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 2.0.4
-apiversion: 2
-architectures: armeabi armeabi-v7a x86
+version: 3.0.1
+apiversion: 3
+architectures: armeabi-v7a x86
 description: Provides a paint surface user interface view.
 author: Fred Spencer
 license: Appcelerator Commercial License
-copyright: Copyright (c) 2010-2013 by Appcelerator, Inc.
+copyright: Copyright (c) 2010-2016 by Appcelerator, Inc.
 
 
 # these should not be edited
@@ -16,4 +16,4 @@ name: paint
 moduleid: ti.paint
 guid: de06ebe1-4ab9-44da-85e4-7409b24190eb
 platform: android
-minsdk: 5.0.0.GA
+minsdk: 6.1.0.GA
