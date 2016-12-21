@@ -34,6 +34,7 @@
     [wetPaintView removeFromSuperview];
     RELEASE_TO_NIL(wetPaintView);
     RELEASE_TO_NIL(drawImage);
+    
     [super dealloc];
 }
 
@@ -41,8 +42,7 @@
 {
     [super frameSizeChanged:frame bounds:bounds];
     [wetPaintView setFrame:bounds];
-    if (drawImage != nil)
-    {
+    if (drawImage != nil) {
         [drawImage setFrame:bounds];
     }
     
@@ -56,8 +56,7 @@
 
 - (UIImageView*)imageView
 {
-    if (drawImage == nil)
-    {
+    if (drawImage == nil) {
         drawImage = [[UIImageView alloc] initWithImage:nil];
         drawImage.frame = [self bounds];
         [self addSubview:drawImage];
@@ -70,13 +69,7 @@
 
 -(void)readyToSavePaint
 {
-    char majorVersion = [[[UIDevice currentDevice] systemVersion] characterAtIndex:0];
-    if (majorVersion == '2' || majorVersion == '3') {
-        UIGraphicsBeginImageContext(drawBox.size);
-    }
-    else {
-        UIGraphicsBeginImageContextWithOptions(drawBox.size, NO, 0.0);
-    }
+    UIGraphicsBeginImageContextWithOptions(drawBox.size, NO, 0.0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     [[self imageView].image drawInRect:CGRectMake(0, 0, drawBox.size.width, drawBox.size.height)];
     [wetPaintView drawInContext:context andApplyErase:YES];
@@ -113,7 +106,8 @@
 {
     ENSURE_UI_THREAD(setImage_, value);
     RELEASE_TO_NIL(drawImage);
-    UIImage* image = value == nil ? nil : [TiUtils image:value proxy:self.proxy];
+    UIImage* image = [TiUtils image:value proxy:self.proxy] ?: nil;
+    
     if (image != nil) {
         drawImage = [[UIImageView alloc] initWithImage:image];
         drawImage.frame = [self bounds];
@@ -126,30 +120,30 @@
 
 - (void)clear:(id)args
 {
-    if (drawImage != nil)
-    {
+    if (drawImage != nil) {
         drawImage.image = nil;
     }
 }
 
-#pragma mark Event Handlers
+#pragma mark Events
+
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
-    [self.proxy fireEvent:@"touchend"];
+    [self processTouchesEnded:touches withEvent:event];
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self.proxy fireEvent:@"touchstart"];
+    [self processTouchesBegan:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self.proxy fireEvent:@"touchmove"];
+    [self processTouchesMoved:touches withEvent:event];
 }
 
 - (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self.proxy fireEvent:@"touchcancel"];
+    [self processTouchesCancelled:touches withEvent:event];
 }
 
 @end

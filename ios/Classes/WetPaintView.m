@@ -57,12 +57,10 @@
         CGContextSetAlpha(context, strokeAlpha);
         CGContextSetBlendMode(context, kCGBlendModeNormal);
         CFDictionaryApplyFunction(_touchLines, drawPoints, context);
-    }
-    else if (applyErase) {
+    } else if (applyErase) {
         CGContextSetBlendMode(context, kCGBlendModeClear);
         CFDictionaryApplyFunction(_touchLines, drawPoints, context);
-    }
-    else {
+    } else {
         CGContextSetAlpha(context, 1); // Erasing does not respect alpha, unfortunately.
         CGContextSetStrokeColorWithColor(context, [[TiUtils colorValue:@"#000"] _color].CGColor);
         CFDictionaryApplyFunction(_touchLines, drawPoints, context);
