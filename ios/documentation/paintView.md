@@ -31,3 +31,21 @@ Controls if the strokes are in "erase mode" -- that is, any existing paint will 
 ### image[string]
 
 Loads an image (by its URL) directly in to the paint view so that it can be drawn on and erased.
+
+## Events
+
+### touchcancel
+
+Fired when a touch event is interrupted by the device.
+
+### touchend
+
+Fired when a touch event is completed.
+
+### touchmove
+
+Fired as soon as the device detects movement of a touch.
+
+### touchstart
+
+Fired as soon as the device detects a touch gesture.
