@@ -1,0 +1,15 @@
+version: 1.0.0
+apiversion: 2
+architectures: ARM x86
+description: Provides a paint surface user interface view.
+author: Gary Mathews
+license: Appcelerator Commercial License
+copyright: Copyright (c) 2017 Axway
+
+# these should not be edited
+name: ti.paint
+moduleid: ti.paint
+moduleIdAsIdentifier: TiPaint
+guid: 3a8ff336-741e-4a70-bb0c-01a4e44574e9
+platform: windows
+minsdk: 6.0.0.GA
