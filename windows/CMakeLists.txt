@@ -21,7 +21,7 @@ project(TiPaint)
 
 set(TiPaint_VERSION 0.1.0)
 
-set(WINDOWS_SOURCE_DIR "C:/ProgramData/Titanium/mobilesdk/win32/6.1.0.v20170123100346/windows")
+set(WINDOWS_SOURCE_DIR "C:/ProgramData/Titanium/mobilesdk/win32/6.2.0.GA/windows")
 
 SET(CMAKE_FIND_LIBRARY_PREFIXES "")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll")
