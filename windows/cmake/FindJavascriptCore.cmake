@@ -1,61 +1,40 @@
-# HAL
+# FindJavaScriptCore
+# Author: Chris Williams
 #
-# Copyright (c) 2017 Axway All Rights Reserved.
+# Copyright (c) 2014 by Appcelerator, Inc. All Rights Reserved.
 # Licensed under the terms of the Apache Public License.
 # Please see the LICENSE included with this distribution for details.
 
-# Author: Matt Langston
-# Created: 2014.09.03
-#
-# Try to find JavaScriptCore. Once done this will define:
-#
-#  JavaScriptCore_FOUND       - system has JavaScriptCore
-#  JavaScriptCore_INCLUDE_DIRS - the include directory
-#  JavaScriptCore_LIBRARY_DIR - the directory containing the library
-#  JavaScriptCore_LIBRARIES   - link these to use JavaScriptCore
+# Author: Chris Williams
+# Created: 2014.12.02
 
-find_package(PkgConfig)
-
-pkg_check_modules(PC_JavaScriptCore QUIET JavaScriptCore)
-
-find_path(JavaScriptCore_INCLUDE_DIRS
-  NAMES JavaScriptCore/JavaScript.h
-  HINTS ${PC_JavaScriptCore_INCLUDE_DIRS} ${PC_JavaScriptCore_INCLUDEDIR}
-  PATHS ENV JavaScriptCore_HOME
-  PATH_SUFFIXES includes
-  )
+if (${CMAKE_SYSTEM_VERSION} MATCHES "^10.0")
+  set(PLATFORM win10)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsPhone")
+  set(PLATFORM phone)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "WindowsStore")
+  set(PLATFORM store)
+else()
+  message(FATAL_ERROR "This app supports Store / Phone only.")
+endif()
 
 set(JavaScriptCore_ARCH "x86")
 if(CMAKE_GENERATOR MATCHES "^Visual Studio .+ ARM$")
   set(JavaScriptCore_ARCH "arm")
 endif()
 
-find_library(JavaScriptCore_LIBRARIES
-  NAMES JavaScriptCore JavaScriptCore-Debug JavaScriptCore-Release
-  HINTS ${PC_JavaScriptCore_LIBRARY_DIRS} ${PC_JavaScriptCore_LIBDIR}
-  PATHS ENV JavaScriptCore_HOME
-  PATH_SUFFIXES ${JavaScriptCore_ARCH}
+# Taken and slightly modified from build's JavaScriptCore_Targets.cmake file
+# INTERFACE_INCLUDE_DIRECTORIES is modified to point to our pre-packaged include dir for module
+
+# Create imported target JavaScriptCore
+add_library(JavaScriptCore SHARED IMPORTED)
+
+set_target_properties(JavaScriptCore PROPERTIES
+  COMPATIBLE_INTERFACE_STRING "JavaScriptCore_MAJOR_VERSION"
+  INTERFACE_JavaScriptCore_MAJOR_VERSION "0"
+)
+
+set_target_properties(JavaScriptCore PROPERTIES
+  IMPORTED_IMPLIB "${WINDOWS_SOURCE_DIR}/lib/JavaScriptCore/${PLATFORM}/${JavaScriptCore_ARCH}/JavaScriptCore.lib"
+  IMPORTED_LOCATION "${WINDOWS_SOURCE_DIR}/lib/JavaScriptCore/${PLATFORM}/${JavaScriptCore_ARCH}/JavaScriptCore.dll"
   )
-
-if(NOT JavaScriptCore_LIBRARIES MATCHES ".+-NOTFOUND")
-  get_filename_component(JavaScriptCore_LIBRARY_DIR ${JavaScriptCore_LIBRARIES} DIRECTORY)
-
-  # If we found the JavaScriptCore library and we're using a Visual
-  # Studio generator and we're targeting either WindowsStore or
-  # WindowsPhone, then allow Visual Studio to use both the
-  # JavaScriptCore-Debug.lib and JavaScriptCore-Release.lib if they
-  # exist.
-  if(CMAKE_GENERATOR MATCHES "^Visual Studio .+" AND CMAKE_SYSTEM_NAME MATCHES "^Windows(Store|Phone)")
-    string(REGEX REPLACE "-(Debug|Release)" "-$(Configuration)" JavaScriptCore_LIBRARIES ${JavaScriptCore_LIBRARIES})
-  endif()
-
-endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(JavaScriptCore DEFAULT_MSG JavaScriptCore_INCLUDE_DIRS JavaScriptCore_LIBRARIES)
-
-# message(STATUS "MDL: CMAKE_CONFIGURATION_TYPES   = ${CMAKE_CONFIGURATION_TYPES}")
-# message(STATUS "MDL: JAVASCRIPTCORE_FOUND        = ${JAVASCRIPTCORE_FOUND}")
-# message(STATUS "MDL: JavaScriptCore_INCLUDE_DIRS = ${JavaScriptCore_INCLUDE_DIRS}")
-# message(STATUS "MDL: JavaScriptCore_LIBRARY_DIR  = ${JavaScriptCore_LIBRARY_DIR}")
-# message(STATUS "MDL: JavaScriptCore_LIBRARIES    = ${JavaScriptCore_LIBRARIES}")
