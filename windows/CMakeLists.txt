@@ -21,7 +21,7 @@ project(TiPaint)
 
 set(TiPaint_VERSION 0.1.0)
 
-set(WINDOWS_SOURCE_DIR "C:/ProgramData/Titanium/mobilesdk/win32/6.2.0.GA/windows")
+set(WINDOWS_SOURCE_DIR "C:/ProgramData/Titanium/mobilesdk/win32/7.0.0.GA/windows")
 
 SET(CMAKE_FIND_LIBRARY_PREFIXES "")
 SET(CMAKE_FIND_LIBRARY_SUFFIXES ".lib" ".dll")
@@ -40,6 +40,7 @@ find_package(HAL REQUIRED)
 find_package(TitaniumKit REQUIRED)
 find_package(LayoutEngine REQUIRED)
 find_package(TitaniumWindows_UI REQUIRED)
+find_package(JavaScriptCore REQUIRED)
 
 enable_testing()
 
@@ -72,6 +73,7 @@ target_include_directories(TiPaint PUBLIC
   )
 
 target_link_libraries(TiPaint
+  JavaScriptCore
   HAL
   TitaniumKit
   LayoutEngine
