@@ -75,10 +75,17 @@ set_target_properties(HAL PROPERTIES
   INTERFACE_HAL_MAJOR_VERSION "0"
 )
 
-set_target_properties(HAL PROPERTIES
-  IMPORTED_IMPLIB "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/HAL.lib"
-  IMPORTED_LOCATION "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/HAL.dll"
+if (HAL_RENAME_AXWAYHAL)
+  set_target_properties(HAL PROPERTIES
+    IMPORTED_IMPLIB "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/AXWAYHAL.lib"
+    IMPORTED_LOCATION "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/AXWAYHAL.dll"
   )
+else()
+  set_target_properties(HAL PROPERTIES
+    IMPORTED_IMPLIB "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/HAL.lib"
+    IMPORTED_LOCATION "${WINDOWS_SOURCE_DIR}/lib/HAL/${PLATFORM}/${HAL_ARCH}/HAL.dll"
+  )
+endif()
 
 # This file does not depend on other imported targets which have
 # been exported from the same project but in a separate export set.
