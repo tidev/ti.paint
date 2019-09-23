@@ -33,7 +33,7 @@ public class PaintViewProxy extends TiViewProxy {
 
 	@Kroll.setProperty
 	@Kroll.method
-	public void setStrokeWidth(Float width) {
+	public void setStrokeWidth(int width) {
 		paintView.setStrokeWidth(width);
 	}
 

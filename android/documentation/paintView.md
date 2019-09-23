@@ -12,7 +12,7 @@ Clears the paint view.
 
 ## Properties
 
-### strokeWidth[double]
+### strokeWidth[int]
 
 Controls the width of the strokes.
 

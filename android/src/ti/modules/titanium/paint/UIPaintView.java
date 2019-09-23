@@ -51,15 +51,15 @@ public class UIPaintView extends TiUIView {
 		tiPaint.setStyle(Paint.Style.STROKE);
 		tiPaint.setStrokeJoin(Paint.Join.ROUND);
 		tiPaint.setStrokeCap(Paint.Cap.ROUND);
-		tiPaint.setStrokeWidth((props.containsKeyAndNotNull("strokeWidth")) ? TiConvert.toFloat(props.get("strokeWidth")) : 12);
+		tiPaint.setStrokeWidth((props.containsKeyAndNotNull("strokeWidth")) ? TiConvert.toInt(props.get("strokeWidth")) : 12);
 		tiPaint.setAlpha((props.containsKeyAndNotNull("strokeAlpha")) ? TiConvert.toInt(props.get("strokeAlpha")) : 255);
 		alphaState = (props.containsKeyAndNotNull("strokeAlpha")) ? TiConvert.toInt(props.get("strokeAlpha")) : 255;
 	}
 
-	public void setStrokeWidth(Float width) {
+	public void setStrokeWidth(int width) {
 		Log.d(LCAT, "Changing stroke width.");
 		tiPaintView.finalizePaths();
-		tiPaint.setStrokeWidth(TiConvert.toFloat(width));
+		tiPaint.setStrokeWidth(TiConvert.toInt(width));
 		tiPaint.setAlpha(alphaState);
 	}
 
