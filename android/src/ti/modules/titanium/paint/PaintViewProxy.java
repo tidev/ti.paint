@@ -12,6 +12,7 @@ import org.appcelerator.kroll.common.TiMessenger;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.view.TiUIView;
+import org.jetbrains.annotations.NotNull;
 
 import android.app.Activity;
 import android.os.Handler;
@@ -74,7 +75,7 @@ public class PaintViewProxy extends TiViewProxy {
 
 	private static final int MSG_CLEAR = 60000;
 	private final Handler handler = new Handler(TiMessenger.getMainMessenger().getLooper(), new Handler.Callback() {
-		public boolean handleMessage(Message msg) {
+		public boolean handleMessage(@NotNull Message msg) {
 			switch (msg.what) {
 				case MSG_CLEAR: {
 					AsyncResult result = (AsyncResult) msg.obj;
