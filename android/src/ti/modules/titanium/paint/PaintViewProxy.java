@@ -63,6 +63,16 @@ public class PaintViewProxy extends TiViewProxy {
 	}
 
 	@Kroll.method
+	public void lineTo(int x, int y) {
+		paintView.lineTo(x, y);
+	}
+
+	@Kroll.method
+	public void moveTo(int x, int y) {
+		paintView.moveTo(x, y);
+	}
+
+	@Kroll.method
 	public void clear() {
 		if (paintView != null) {
 			if (!TiApplication.isUIThread()) {

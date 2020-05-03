@@ -103,6 +103,16 @@ public class UIPaintView extends TiUIView {
 		tiPaintView.clear();
 	}
 
+	public void moveTo(int x, int y) {
+		tiPaintView.finalizePath(0);
+		tiPaintView.touch_start(0, x, y);
+		tiPaintView.invalidate();
+	}
+	public void lineTo(int x, int y) {
+		tiPaintView.touch_move(0, x, y);
+		tiPaintView.invalidate();
+	}
+
 	public class PaintView extends View {
 
 		private static final int maxTouchPoints = 20;
@@ -137,9 +147,9 @@ public class UIPaintView extends TiUIView {
 				}
 				tiCanvas = new Canvas(tiBitmap);
 			}
-			else {		
+			else {
 				tiBitmap = Bitmap.createScaledBitmap(tiBitmap, w, h, true);
-				tiCanvas = new Canvas(tiBitmap);			
+				tiCanvas = new Canvas(tiBitmap);
 			}
 
 		}
@@ -158,14 +168,14 @@ public class UIPaintView extends TiUIView {
 			}
 		}
 
-		private void touch_start(int id, float x, float y) {
+		public void touch_start(int id, float x, float y) {
 			tiPaths[id] = new Path();
 			tiPaths[id].moveTo(x, y);
 			tiX[id] = x;
 			tiY[id] = y;
 		}
 
-		private void touch_move(int id, float x, float y) {
+		public void touch_move(int id, float x, float y) {
 			if (tiPaths[id] == null) {
 				tiPaths[id] = new Path();
 				tiPaths[id].moveTo(tiX[id], tiY[id]);
@@ -212,7 +222,7 @@ public class UIPaintView extends TiUIView {
 				tiPaths[id] = null;
 			}
 		}
-		
+
 		public void finalizePaths() {
 			for (int i = 0; i < maxTouchPoints; i++) {
 				if (tiPaths[i] != null) {
