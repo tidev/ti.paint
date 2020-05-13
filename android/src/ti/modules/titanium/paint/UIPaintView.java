@@ -108,9 +108,14 @@ public class UIPaintView extends TiUIView {
 		tiPaintView.touch_start(0, x, y);
 		tiPaintView.invalidate();
 	}
+
 	public void lineTo(int x, int y) {
 		tiPaintView.touch_move(0, x, y);
 		tiPaintView.invalidate();
+	}
+
+	public void enable(boolean enable) {
+		tiPaintView.enable(enable);
 	}
 
 	public class PaintView extends View {
@@ -125,6 +130,7 @@ public class UIPaintView extends TiUIView {
 		private String tiImage;
 		private Canvas tiCanvas;
 		private Paint tiBitmapPaint;
+		private boolean enabled = true;
 
 		public PaintView(Context c) {
 			super(c);
@@ -175,6 +181,10 @@ public class UIPaintView extends TiUIView {
 			tiY[id] = y;
 		}
 
+		public void enable(boolean enable) {
+			enabled = enable;
+		}
+
 		public void touch_move(int id, float x, float y) {
 			if (tiPaths[id] == null) {
 				tiPaths[id] = new Path();
@@ -187,31 +197,32 @@ public class UIPaintView extends TiUIView {
 
 		@Override
 		public boolean onTouchEvent(MotionEvent mainEvent) {
-			for (int i = 0; i < mainEvent.getPointerCount(); i++) {
-				int id = mainEvent.getPointerId(i);
-				float x = mainEvent.getX(i);
-				float y = mainEvent.getY(i);
-				int action = mainEvent.getAction();
-				if (action > 6) {
-					action = (action % 256) - 5;
-				}
-				switch (action) {
-					case MotionEvent.ACTION_DOWN:
-						finalizePath(id);
-						touch_start(id, x, y);
-						invalidate();
-						break;
-					case MotionEvent.ACTION_MOVE:
-						touch_move(id, x, y);
-						invalidate();
-						break;
-					case MotionEvent.ACTION_UP:
-						finalizePath(id);
-						invalidate();
-						break;
+			if (enabled) {
+				for (int i = 0; i < mainEvent.getPointerCount(); i++) {
+					int id = mainEvent.getPointerId(i);
+					float x = mainEvent.getX(i);
+					float y = mainEvent.getY(i);
+					int action = mainEvent.getAction();
+					if (action > 6) {
+						action = (action % 256) - 5;
+					}
+					switch (action) {
+						case MotionEvent.ACTION_DOWN:
+							finalizePath(id);
+							touch_start(id, x, y);
+							invalidate();
+							break;
+						case MotionEvent.ACTION_MOVE:
+							touch_move(id, x, y);
+							invalidate();
+							break;
+						case MotionEvent.ACTION_UP:
+							finalizePath(id);
+							invalidate();
+							break;
+					}
 				}
 			}
-
 			return true;
 		}
 

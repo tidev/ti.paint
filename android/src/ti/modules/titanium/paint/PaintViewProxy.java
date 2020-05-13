@@ -73,6 +73,11 @@ public class PaintViewProxy extends TiViewProxy {
 	}
 
 	@Kroll.method
+	public void enable(boolean enable) {
+		paintView.enable(enable);
+	}
+
+	@Kroll.method
 	public void clear() {
 		if (paintView != null) {
 			if (!TiApplication.isUIThread()) {
