@@ -14,6 +14,16 @@ var paintView = Paint.createPaintView({});
 * clear()
 Clears the paint view.
 
+* moveTo(x,y) [Android only]
+Move to position x/y
+
+* lineTo(x,y) [Android only]
+Draw line to position x/y
+
+* enable(true/false) [Android only]
+Disable drawing
+
+
 ### Properties
 
 * strokeWidth[double]
