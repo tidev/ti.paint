@@ -23,6 +23,9 @@ Draw line to position x/y
 * enable(true/false) [Android only]
 Disable drawing
 
+* undo()/redo() [Android only]
+Undo or redo last action
+
 
 ### Properties
 

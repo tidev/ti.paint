@@ -20,7 +20,6 @@ var buttonStrokeWidth = Ti.UI.createButton({
 	left: 10,
 	bottom: 10,
 	right: 10,
-	height: 30,
 	title: 'Decrease Stroke Width'
 });
 buttonStrokeWidth.addEventListener('click', function(e) {
@@ -32,8 +31,6 @@ win.add(buttonStrokeWidth);
 var buttonStrokeColorRed = Ti.UI.createButton({
 	bottom: 100,
 	left: 10,
-	width: 75,
-	height: 30,
 	title: 'Red'
 });
 buttonStrokeColorRed.addEventListener('click', function() {
@@ -42,8 +39,6 @@ buttonStrokeColorRed.addEventListener('click', function() {
 var buttonStrokeColorGreen = Ti.UI.createButton({
 	bottom: 70,
 	left: 10,
-	width: 75,
-	height: 30,
 	title: 'Green'
 });
 buttonStrokeColorGreen.addEventListener('click', function() {
@@ -52,8 +47,6 @@ buttonStrokeColorGreen.addEventListener('click', function() {
 var buttonStrokeColorBlue = Ti.UI.createButton({
 	bottom: 40,
 	left: 10,
-	width: 75,
-	height: 30,
 	title: 'Blue'
 });
 buttonStrokeColorBlue.addEventListener('click', function() {
@@ -66,8 +59,6 @@ win.add(buttonStrokeColorBlue);
 var clear = Ti.UI.createButton({
 	bottom: 40,
 	left: 100,
-	width: 75,
-	height: 30,
 	title: 'Clear'
 });
 clear.addEventListener('click', function() {
@@ -75,11 +66,30 @@ clear.addEventListener('click', function() {
 });
 win.add(clear);
 
+if (OS_ANDROID) {
+	var undo = Ti.UI.createButton({
+		bottom: 70,
+		left: 100,
+		title: 'undo'
+	});
+	undo.addEventListener('click', function() {
+		paintView.undo();
+	});
+	win.add(undo);
+	var redo = Ti.UI.createButton({
+		bottom: 100,
+		left: 100,
+		title: 'redo'
+	});
+	redo.addEventListener('click', function() {
+		paintView.redo();
+	});
+	win.add(redo);
+}
+
 var buttonStrokeAlpha = Ti.UI.createButton({
 	bottom: 70,
 	right: 10,
-	width: 100,
-	height: 30,
 	title: 'Alpha : 100%'
 });
 buttonStrokeAlpha.addEventListener('click', function(e) {
@@ -91,8 +101,6 @@ win.add(buttonStrokeAlpha);
 var buttonStrokeColorEraser = Ti.UI.createButton({
 	bottom: 40,
 	right: 10,
-	width: 100,
-	height: 30,
 	title: 'Erase : Off'
 });
 buttonStrokeColorEraser.addEventListener('click', function(e) {

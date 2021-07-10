@@ -11,6 +11,7 @@ import org.appcelerator.kroll.common.AsyncResult;
 import org.appcelerator.kroll.common.TiMessenger;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.proxy.TiViewProxy;
+import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.view.TiUIView;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,8 +35,8 @@ public class PaintViewProxy extends TiViewProxy {
 
 	@Kroll.setProperty
 	@Kroll.method
-	public void setStrokeWidth(Float width) {
-		paintView.setStrokeWidth(width);
+	public void setStrokeWidth(Object width) {
+		paintView.setStrokeWidth(TiConvert.toFloat(width));
 	}
 
 	@Kroll.setProperty
@@ -70,6 +71,16 @@ public class PaintViewProxy extends TiViewProxy {
 	@Kroll.method
 	public void moveTo(int x, int y) {
 		paintView.moveTo(x, y);
+	}
+
+	@Kroll.method
+	public void undo() {
+		paintView.undo();
+	}
+
+	@Kroll.method
+	public void redo() {
+		paintView.redo();
 	}
 
 	@Kroll.method
