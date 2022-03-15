@@ -1,6 +1,6 @@
 /**
  * Ti.Paint Module
- * Copyright (c) 2010-2013 by Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2010-present by TiDev, Inc. All Rights Reserved.
  * Please see the LICENSE included with this distribution for details.
  */
 
@@ -83,7 +83,7 @@ public class UIPaintView extends TiUIView {
 		eraseState = toggle;
 		if (eraseState) {
 			tiPaint.setColor(TiConvert.toColor("black"));
-            tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+						tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		} else {
 			tiPaint.setXfermode(null);
 		}
@@ -188,24 +188,19 @@ public class UIPaintView extends TiUIView {
 
 		@Override
 		protected void onDraw(Canvas canvas) {
-			// boolean containsBG = props.containsKeyAndNotNull(TiC.PROPERTY_BACKGROUND_COLOR);
-			// canvas.drawColor(containsBG ? TiConvert.toColor(props, TiC.PROPERTY_BACKGROUND_COLOR) : TiConvert.toColor("transparent"));
-			// canvas.drawBitmap(tiBitmap, 0, 0, tiBitmapPaint);
-
 			for (PathPaint p : tiPaths) {
 				canvas.drawPath(p.getPath(), p.getPaint());
 			}
 			canvas.drawPath(mPath, tiPaint);
-
 		}
 
 		public void touch_start(float x, float y) {
 			setPaintOptions();
 			undoPaths.clear();
-            mPath.reset();
-            mPath.moveTo(x, y);
+			mPath.reset();
+			mPath.moveTo(x, y);
 			mX = x;
-            mY = y;
+			mY = y;
 		}
 
 		public void enable(boolean enable) {
@@ -240,18 +235,18 @@ public class UIPaintView extends TiUIView {
 		}
 
 		public void undo() {
-            if (tiPaths.size()>0) {
-               undoPaths.add(tiPaths.remove(tiPaths.size()-1));
-               invalidate();
-            }
-        }
+			if (tiPaths.size()>0) {
+				 undoPaths.add(tiPaths.remove(tiPaths.size()-1));
+				 invalidate();
+			}
+		}
 
 		public void redo() {
 			if (undoPaths.size()>0) {
 				tiPaths.add(undoPaths.remove(undoPaths.size()-1));
 				invalidate();
 			}
-        }
+		}
 
 		@Override
 		public boolean onTouchEvent(MotionEvent mainEvent) {
