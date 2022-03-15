@@ -1,4 +1,4 @@
-ti.paint [![Build Status](https://travis-ci.org/appcelerator-modules/ti.paint.svg)](https://travis-ci.org/appcelerator-modules/ti.paint)
+ti.paint
 =======
 
 This is the Paint Module for Titanium.
@@ -60,11 +60,11 @@ Fired as soon as the device detects a touch gesture.
 
 ## Contributors
 
-* Please see https://github.com/appcelerator-archive/ti.paint/graphs/contributors
-* Interested in contributing? Read the [contributors/committer's](https://wiki.appcelerator.org/display/community/Home) guide.
+* Please see https://github.com/tidev/ti.paint/graphs/contributors
+* Interested in contributing? Read the [contributors/committer's](https://github.com/tidev/organization-docs/blob/main/BECOMING_A_COMMITTER.md) guide.
 
 ## Legal
 
-This module is Copyright (c) 2010-present by Axway Appcelerator, Inc. All Rights Reserved. Usage of this module is subject to
-the Terms of Service agreement with Appcelerator, Inc.  
+This module is Copyright (c) 2010-present by Tidev, Inc. All Rights Reserved. Usage of this module is subject to
+the Terms of Service agreement with Tidev, Inc.  
 nc.
