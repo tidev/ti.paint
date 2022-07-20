@@ -29,7 +29,7 @@ public class UIPaintView extends TiUIView {
 	public PaintView tiPaintView;
 	private KrollDict props;
 	private Boolean eraseState = false;
-	private int currentColor = -1;
+	private int currentColor = -999999999;
 	private int alphaState = -1;
 	private Float oldWidth = -1.0f;
 
@@ -47,7 +47,7 @@ public class UIPaintView extends TiUIView {
 	}
 
 	private void setPaintOptions() {
-		if (currentColor == -1) {
+		if (currentColor == -999999999) {
 			currentColor = (props.containsKeyAndNotNull("strokeColor")) ? TiConvert.toColor(props, "strokeColor") : TiConvert.toColor("black");
 		}
 
@@ -83,7 +83,7 @@ public class UIPaintView extends TiUIView {
 		eraseState = toggle;
 		if (eraseState) {
 			tiPaint.setColor(TiConvert.toColor("black"));
-						tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+			tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		} else {
 			tiPaint.setXfermode(null);
 		}
