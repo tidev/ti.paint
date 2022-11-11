@@ -2,13 +2,13 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.4.2
+version: 2.0.0
 apiversion: 2
-architectures: armv7 i386 x86_64 arm64
+architectures: arm64 x86_64
 description: Provides a paint surface user interface view.
-author: Jeff Haynie 
-license: Appcelerator Commercial License 
-copyright: Copyright (c) 2010-Present by Appcelerator, Inc. 
+author: Jeff Haynie
+license: Appcelerator Commercial License
+copyright: Copyright (c) 2010-Present by Appcelerator, Inc.
 
 
 # these should not be edited
@@ -16,4 +16,4 @@ name: paint
 moduleid: ti.paint
 guid: 43f13063-d426-4e9c-8a7a-72dc5e4aec57
 platform: iphone
-minsdk: 5.0.0
+minsdk: 9.3.2
