@@ -229,7 +229,6 @@ public class UIPaintView extends TiUIView {
 
 		public void touch_up() {
 			mPath.lineTo(mX, mY);
-			tiCanvas.drawPath(mPath, tiPaint);
 			tiPaths.add(pp);
 
 			mPath = new Path();
