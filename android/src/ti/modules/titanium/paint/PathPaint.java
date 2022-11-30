@@ -6,6 +6,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
+import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 
 public class PathPaint {
@@ -20,7 +21,7 @@ public class PathPaint {
 
 	public Paint getPaint() {
 			if (isErease) {
-					myPaint.setColor(TiConvert.toColor("black"));
+					myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
 					myPaint.setAlpha(0xFF);
 					myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 					myPaint.setColor(Color.TRANSPARENT);
@@ -51,7 +52,7 @@ public class PathPaint {
 			myPaint = new Paint();
 			myPaint.setAntiAlias(true);
 			myPaint.setDither(true);
-			myPaint.setColor(TiConvert.toColor("black"));
+			myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
 			myPaint.setStyle(Paint.Style.STROKE);
 			myPaint.setStrokeJoin(Paint.Join.ROUND);
 			myPaint.setStrokeCap(Paint.Cap.ROUND);

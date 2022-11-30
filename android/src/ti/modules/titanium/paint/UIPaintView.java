@@ -9,7 +9,10 @@ package ti.modules.titanium.paint;
 import org.appcelerator.kroll.KrollDict;
 
 import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.TiC;
+import org.appcelerator.titanium.io.TiBaseFile;
+import org.appcelerator.titanium.io.TiFileFactory;
 import org.appcelerator.titanium.proxy.TiViewProxy;
 import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.view.TiDrawableReference;
@@ -20,6 +23,8 @@ import android.graphics.*;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class UIPaintView extends TiUIView {
@@ -48,7 +53,7 @@ public class UIPaintView extends TiUIView {
 
 	private void setPaintOptions() {
 		if (currentColor == -999999999) {
-			currentColor = (props.containsKeyAndNotNull("strokeColor")) ? TiConvert.toColor(props, "strokeColor") : TiConvert.toColor("black");
+			currentColor = (props.containsKeyAndNotNull("strokeColor")) ? TiConvert.toColor(props, "strokeColor", TiApplication.getAppCurrentActivity()) : TiConvert.toColor("black",TiApplication.getAppCurrentActivity());
 		}
 
 		if (oldWidth == -1.0f) {
@@ -82,7 +87,7 @@ public class UIPaintView extends TiUIView {
 	public void setEraseMode(Boolean toggle) {
 		eraseState = toggle;
 		if (eraseState) {
-			tiPaint.setColor(TiConvert.toColor("black"));
+			tiPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
 			tiPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		} else {
 			tiPaint.setXfermode(null);
@@ -92,7 +97,7 @@ public class UIPaintView extends TiUIView {
 
 	public void setStrokeColor(String color) {
 		Log.d(LCAT, "Changing stroke color.");
-		currentColor = TiConvert.toColor(color);
+		currentColor = TiConvert.toColor(color, TiApplication.getAppCurrentActivity());
 		tiPaint.setColor(currentColor);
 		tiPaint.setAlpha(alphaState);
 	}
@@ -171,8 +176,12 @@ public class UIPaintView extends TiUIView {
 
 			if(tiBitmap == null){
 				if (tiImage != null) {
-					TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
-					tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
+					TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, proxy.resolveUrl(null, tiImage));
+					if (ref.getBitmap() != null) {
+						tiBitmap = Bitmap.createScaledBitmap(ref.getBitmap(), w, h, true);
+					} else {
+						tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+					}
 				} else {
 					tiBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 				}
@@ -188,9 +197,13 @@ public class UIPaintView extends TiUIView {
 
 		@Override
 		protected void onDraw(Canvas canvas) {
+			if (tiBitmap != null) {
+				canvas.drawBitmap(tiBitmap, 0, 0, null);
+			}
 			for (PathPaint p : tiPaths) {
 				canvas.drawPath(p.getPath(), p.getPaint());
 			}
+
 			canvas.drawPath(mPath, tiPaint);
 		}
 
@@ -279,15 +292,17 @@ public class UIPaintView extends TiUIView {
 
 
 		public void setImage(String imagePath) {
-			Log.i(LCAT, "setImage called");
+			Log.d(LCAT, "setImage called");
 			tiImage = imagePath;
 			if (tiImage == null) {
 				clear();
 			} else {
-				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, tiImage);
-				tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
-				tiCanvas = new Canvas(tiBitmap);
-				invalidate();
+				TiDrawableReference ref = TiDrawableReference.fromUrl(proxy, proxy.resolveUrl(null, tiImage));
+				if (ref.getBitmap() != null) {
+					tiBitmap = ref.getBitmap().copy(Bitmap.Config.ARGB_8888, true);
+					tiCanvas = new Canvas(tiBitmap);
+					invalidate();
+				}
 			}
 		}
 

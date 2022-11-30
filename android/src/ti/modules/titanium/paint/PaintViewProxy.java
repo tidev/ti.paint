@@ -34,33 +34,32 @@ public class PaintViewProxy extends TiViewProxy {
 	}
 
 	@Kroll.setProperty
-	@Kroll.method
 	public void setStrokeWidth(Object width) {
 		paintView.setStrokeWidth(TiConvert.toFloat(width));
 	}
 
 	@Kroll.setProperty
-	@Kroll.method
 	public void setStrokeColor(String color) {
 		paintView.setStrokeColor(color);
 	}
 
 	@Kroll.setProperty
-	@Kroll.method
 	public void setEraseMode(Boolean toggle) {
 		paintView.setEraseMode(toggle);
 	}
 
 	@Kroll.setProperty
-	@Kroll.method
 	public void setStrokeAlpha(int alpha) {
 		paintView.setStrokeAlpha(alpha);
 	}
 
 	@Kroll.setProperty
-	@Kroll.method
 	public void setImage(String imagePath) {
-		paintView.setImage(imagePath);
+		if (!TiApplication.isUIThread()) {
+			TiMessenger.sendBlockingMainMessage(handler.obtainMessage(MSG_LOAD));
+		} else {
+			paintView.setImage(imagePath);
+		}
 	}
 
 	@Kroll.method
@@ -100,12 +99,19 @@ public class PaintViewProxy extends TiViewProxy {
 	}
 
 	private static final int MSG_CLEAR = 60000;
+	private static final int MSG_LOAD = 60001;
 	private final Handler handler = new Handler(TiMessenger.getMainMessenger().getLooper(), new Handler.Callback() {
 		public boolean handleMessage(@NotNull Message msg) {
 			switch (msg.what) {
 				case MSG_CLEAR: {
 					AsyncResult result = (AsyncResult) msg.obj;
 					paintView.clear();
+					result.setResult(null);
+					return true;
+				}
+				case MSG_LOAD: {
+					AsyncResult result = (AsyncResult) msg.obj;
+					paintView.setImage(result.getResult().toString());
 					result.setResult(null);
 					return true;
 				}
