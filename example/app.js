@@ -3,6 +3,7 @@ var Paint = require('ti.paint');
 var win = Ti.UI.createWindow({
 	backgroundColor: '#fff'
 });
+
 var paintView = Paint.createPaintView({
 	top: 0,
 	right: 0,
@@ -14,6 +15,7 @@ var paintView = Paint.createPaintView({
 	strokeWidth: 10,
 	eraseMode: false
 });
+
 win.add(paintView);
 
 var buttonStrokeWidth = Ti.UI.createButton({
@@ -22,10 +24,12 @@ var buttonStrokeWidth = Ti.UI.createButton({
 	right: 10,
 	title: 'Decrease Stroke Width'
 });
+
 buttonStrokeWidth.addEventListener('click', function(e) {
-	paintView.strokeWidth = (paintView.strokeWidth === 10) ? 5 : 10;
-	e.source.title = (paintView.strokeWidth === 10) ? 'Decrease Stroke Width' : 'Increase Stroke Width';
+	paintView.strokeWidth = (paintView.strokeWidth === 50) ? 25 : 50;
+	e.source.title = (paintView.strokeWidth === 50) ? 'Decrease Stroke Width' : 'Increase Stroke Width';
 });
+
 win.add(buttonStrokeWidth);
 
 var buttonStrokeColorRed = Ti.UI.createButton({
@@ -33,25 +37,31 @@ var buttonStrokeColorRed = Ti.UI.createButton({
 	left: 10,
 	title: 'Red'
 });
+
 buttonStrokeColorRed.addEventListener('click', function() {
 	paintView.strokeColor = 'red';
 });
+
 var buttonStrokeColorGreen = Ti.UI.createButton({
 	bottom: 70,
 	left: 10,
 	title: 'Green'
 });
+
 buttonStrokeColorGreen.addEventListener('click', function() {
 	paintView.strokeColor = '#0f0';
 });
+
 var buttonStrokeColorBlue = Ti.UI.createButton({
 	bottom: 40,
 	left: 10,
 	title: 'Blue'
 });
+
 buttonStrokeColorBlue.addEventListener('click', function() {
 	paintView.strokeColor = '#0000ff';
 });
+
 win.add(buttonStrokeColorRed);
 win.add(buttonStrokeColorGreen);
 win.add(buttonStrokeColorBlue);
@@ -61,9 +71,12 @@ var clear = Ti.UI.createButton({
 	left: 100,
 	title: 'Clear'
 });
+
 clear.addEventListener('click', function() {
 	paintView.clear();
+	paintView.image = 'https://codigomovil.mx/storage/libros/1/fotos/hard-candy.png';
 });
+
 win.add(clear);
 
 if (OS_ANDROID) {
@@ -72,18 +85,23 @@ if (OS_ANDROID) {
 		left: 100,
 		title: 'undo'
 	});
+
 	undo.addEventListener('click', function() {
 		paintView.undo();
 	});
+
 	win.add(undo);
+
 	var redo = Ti.UI.createButton({
 		bottom: 100,
 		left: 100,
 		title: 'redo'
 	});
+
 	redo.addEventListener('click', function() {
 		paintView.redo();
 	});
+
 	win.add(redo);
 }
 
@@ -92,10 +110,12 @@ var buttonStrokeAlpha = Ti.UI.createButton({
 	right: 10,
 	title: 'Alpha : 100%'
 });
+
 buttonStrokeAlpha.addEventListener('click', function(e) {
 	paintView.strokeAlpha = (paintView.strokeAlpha === 255) ? 127 : 255;
 	e.source.title = (paintView.strokeAlpha === 255) ? 'Alpha : 100%' : 'Alpha : 50%';
 });
+
 win.add(buttonStrokeAlpha);
 
 var buttonStrokeColorEraser = Ti.UI.createButton({
@@ -103,26 +123,28 @@ var buttonStrokeColorEraser = Ti.UI.createButton({
 	right: 10,
 	title: 'Erase : Off'
 });
+
 buttonStrokeColorEraser.addEventListener('click', function(e) {
 	paintView.eraseMode = (paintView.eraseMode) ? false : true;
 	e.source.title = (paintView.eraseMode) ? 'Erase : On' : 'Erase : Off';
 });
+
 win.add(buttonStrokeColorEraser);
 
-paintView.addEventListener('touchcancel', function(e) {
-	console.log('touchcancel event fired.');
-});
+// paintView.addEventListener('touchcancel', function(e) {
+// 	console.log('touchcancel event fired.');
+// });
 
-paintView.addEventListener('touchend', function(e) {
-	console.log('touchend event fired.');
-});
+// paintView.addEventListener('touchend', function(e) {
+// 	console.log('touchend event fired.');
+// });
 
-paintView.addEventListener('touchmove', function(e) {
-	console.log('touchmove event fired.');
-});
+// paintView.addEventListener('touchmove', function(e) {
+// 	console.log('touchmove event fired.');
+// });
 
-paintView.addEventListener('touchstart', function(e) {
-	console.log('touchstart event fired.');
-});
+// paintView.addEventListener('touchstart', function(e) {
+// 	console.log('touchstart event fired.');
+// });
 
 win.open();
