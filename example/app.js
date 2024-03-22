@@ -88,10 +88,16 @@ if (OS_ANDROID) {
 		left: 100,
 		title: 'redo'
 	});
-	redo.addEventListener('click', function() {
-		paintView.redo();
+	var fill = Ti.UI.createButton({
+		height: 40,
+		bottom: 130,
+		left: 10,
+		title: 'fill'
 	});
-	win.add(redo);
+	fill.addEventListener('click', function() {
+		paintView.fill("#ff0000");
+	});
+	win.add(fill);
 }
 
 var isSaved = false;
