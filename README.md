@@ -26,6 +26,9 @@ Disable drawing
 * undo()/redo() [Android only]
 Undo or redo last action
 
+* fill(color) [Android only]
+Fills the whole paint view with a solid color
+
 
 ### Properties
 
