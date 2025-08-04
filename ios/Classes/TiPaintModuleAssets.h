@@ -5,5 +5,5 @@
 @interface TiPaintModuleAssets : NSObject
 {
 }
-- (NSData*) moduleAsset;
+- (NSData *)moduleAsset;
 @end

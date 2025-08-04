@@ -34,7 +34,7 @@
     [wetPaintView removeFromSuperview];
     RELEASE_TO_NIL(wetPaintView);
     RELEASE_TO_NIL(drawImage);
-    
+
     [super dealloc];
 }
 
@@ -45,7 +45,7 @@
     if (drawImage != nil) {
         [drawImage setFrame:bounds];
     }
-    
+
     // MOD-348: Ensure that we get a solid box in which to draw. Otherwise, we'll end
     // up with blurry lines and visual defects.
     drawBox = CGRectMake(bounds.origin.x, bounds.origin.y,
@@ -107,7 +107,7 @@
     ENSURE_UI_THREAD(setImage_, value);
     RELEASE_TO_NIL(drawImage);
     UIImage* image = [TiUtils image:value proxy:self.proxy] ?: nil;
-    
+
     if (image != nil) {
         drawImage = [[UIImageView alloc] initWithImage:image];
         drawImage.frame = [self bounds];
