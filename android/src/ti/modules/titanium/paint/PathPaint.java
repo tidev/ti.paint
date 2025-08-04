@@ -1,11 +1,12 @@
 package ti.modules.titanium.paint;
 
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Paint;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
+import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 
 public class PathPaint {
@@ -20,10 +21,10 @@ public class PathPaint {
 
 	public Paint getPaint() {
 			if (isErease) {
-					myPaint.setColor(TiConvert.toColor("black"));
 					myPaint.setAlpha(0xFF);
-					myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 					myPaint.setColor(Color.TRANSPARENT);
+					myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+					myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
 			}
 			return myPaint;
 	}
@@ -49,11 +50,11 @@ public class PathPaint {
 			myPaint = new Paint();
 
 			myPaint = new Paint();
-			myPaint.setAntiAlias(true);
 			myPaint.setDither(true);
-			myPaint.setColor(TiConvert.toColor("black"));
+			myPaint.setAntiAlias(true);
 			myPaint.setStyle(Paint.Style.STROKE);
-			myPaint.setStrokeJoin(Paint.Join.ROUND);
 			myPaint.setStrokeCap(Paint.Cap.ROUND);
+			myPaint.setStrokeJoin(Paint.Join.ROUND);
+			myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
 	}
 }
