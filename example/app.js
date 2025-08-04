@@ -1,10 +1,10 @@
-var Paint = require('ti.paint');
+let Paint = require('ti.paint');
 
-var win = Ti.UI.createWindow({
+let win = Ti.UI.createWindow({
 	backgroundColor: '#fff'
 });
 
-var paintView = Paint.createPaintView({
+let paintView = Paint.createPaintView({
 	top: 0,
 	right: 0,
 	bottom: 80,
@@ -18,7 +18,8 @@ var paintView = Paint.createPaintView({
 
 win.add(paintView);
 
-var buttonStrokeWidth = Ti.UI.createButton({
+let buttonStrokeWidth = Ti.UI.createButton({
+	height: 40,
 	left: 10,
 	bottom: 10,
 	right: 10,
@@ -32,7 +33,8 @@ buttonStrokeWidth.addEventListener('click', function(e) {
 
 win.add(buttonStrokeWidth);
 
-var buttonStrokeColorRed = Ti.UI.createButton({
+let buttonStrokeColorRed = Ti.UI.createButton({
+	height: 40,
 	bottom: 100,
 	left: 10,
 	title: 'Red'
@@ -42,7 +44,8 @@ buttonStrokeColorRed.addEventListener('click', function() {
 	paintView.strokeColor = 'red';
 });
 
-var buttonStrokeColorGreen = Ti.UI.createButton({
+let buttonStrokeColorGreen = Ti.UI.createButton({
+	height: 40,
 	bottom: 70,
 	left: 10,
 	title: 'Green'
@@ -52,7 +55,8 @@ buttonStrokeColorGreen.addEventListener('click', function() {
 	paintView.strokeColor = '#0f0';
 });
 
-var buttonStrokeColorBlue = Ti.UI.createButton({
+let buttonStrokeColorBlue = Ti.UI.createButton({
+	height: 40,
 	bottom: 40,
 	left: 10,
 	title: 'Blue'
@@ -66,7 +70,8 @@ win.add(buttonStrokeColorRed);
 win.add(buttonStrokeColorGreen);
 win.add(buttonStrokeColorBlue);
 
-var clear = Ti.UI.createButton({
+let clear = Ti.UI.createButton({
+	height: 40,
 	bottom: 40,
 	left: 100,
 	title: 'Clear'
@@ -74,13 +79,13 @@ var clear = Ti.UI.createButton({
 
 clear.addEventListener('click', function() {
 	paintView.clear();
-	paintView.image = 'https://codigomovil.mx/storage/libros/1/fotos/hard-candy.png';
 });
 
 win.add(clear);
 
 if (OS_ANDROID) {
-	var undo = Ti.UI.createButton({
+	let undo = Ti.UI.createButton({
+		height: 40,
 		bottom: 70,
 		left: 100,
 		title: 'undo'
@@ -92,7 +97,8 @@ if (OS_ANDROID) {
 
 	win.add(undo);
 
-	var redo = Ti.UI.createButton({
+	let redo = Ti.UI.createButton({
+		height: 40,
 		bottom: 100,
 		left: 100,
 		title: 'redo'
@@ -105,7 +111,30 @@ if (OS_ANDROID) {
 	win.add(redo);
 }
 
-var buttonStrokeAlpha = Ti.UI.createButton({
+let isSaved = false;
+
+let buttonLoadSave = Ti.UI.createButton({
+	height: 40,
+	bottom: 100,
+	right: 10,
+	title: 'Save/Load'
+});
+
+buttonLoadSave.addEventListener('click', function(e) {
+	let file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, "tmp.jpg");
+	if (!isSaved) {
+		paintView.toImage(function(blob) {
+			file.write(blob);
+			alert("done");
+		})
+	} else {
+		paintView.image = file.nativePath
+	}
+	isSaved = !isSaved;
+});
+
+let buttonStrokeAlpha = Ti.UI.createButton({
+	height: 40,
 	bottom: 70,
 	right: 10,
 	title: 'Alpha : 100%'
@@ -118,7 +147,8 @@ buttonStrokeAlpha.addEventListener('click', function(e) {
 
 win.add(buttonStrokeAlpha);
 
-var buttonStrokeColorEraser = Ti.UI.createButton({
+let buttonStrokeColorEraser = Ti.UI.createButton({
+	height: 40,
 	bottom: 40,
 	right: 10,
 	title: 'Erase : Off'
@@ -130,21 +160,11 @@ buttonStrokeColorEraser.addEventListener('click', function(e) {
 });
 
 win.add(buttonStrokeColorEraser);
+win.add(buttonLoadSave);
 
-// paintView.addEventListener('touchcancel', function(e) {
-// 	console.log('touchcancel event fired.');
-// });
-
-// paintView.addEventListener('touchend', function(e) {
-// 	console.log('touchend event fired.');
-// });
-
-// paintView.addEventListener('touchmove', function(e) {
-// 	console.log('touchmove event fired.');
-// });
-
-// paintView.addEventListener('touchstart', function(e) {
-// 	console.log('touchstart event fired.');
-// });
+paintView.addEventListener('touchcancel', function(e) { });
+paintView.addEventListener('touchend', function(e) { });
+paintView.addEventListener('touchmove', function(e) { });
+paintView.addEventListener('touchstart', function(e) { });
 
 win.open();
