@@ -97,6 +97,65 @@ public class PaintViewProxy extends TiViewProxy {
 			}
 		}
 	}
+	
+	// Playback methods
+	@Kroll.method
+	public void playbackDrawing(float durationSeconds) {
+		if (paintView != null) {
+			paintView.playbackDrawing(durationSeconds);
+		}
+	}
+	
+	@Kroll.method
+	public void pausePlayback() {
+		if (paintView != null) {
+			paintView.pausePlayback();
+		}
+	}
+	
+	@Kroll.method
+	public void resumePlayback() {
+		if (paintView != null) {
+			paintView.resumePlayback();
+		}
+	}
+	
+	@Kroll.method
+	public void stopPlayback() {
+		if (paintView != null) {
+			paintView.stopPlayback();
+		}
+	}
+	
+	@Kroll.method
+	public void setPlaybackSpeed(float speed) {
+		if (paintView != null) {
+			paintView.setPlaybackSpeed(speed);
+		}
+	}
+	
+	@Kroll.method
+	public float getPlaybackProgress() {
+		if (paintView != null) {
+			return paintView.getPlaybackProgress();
+		}
+		return 0.0f;
+	}
+
+	@Kroll.method
+	public Object[] getStrokesData() {
+		if (paintView != null) {
+			return paintView.getStrokesData();
+		}
+		return new Object[0];
+	}
+
+	@Kroll.method
+	public void loadStrokes(Object[] strokesData) {
+		if (paintView != null) {
+			paintView.loadStrokes(strokesData);
+		}
+	}
 
 	private static final int MSG_LOAD = 60001;
 	private static final int MSG_CLEAR = 60000;

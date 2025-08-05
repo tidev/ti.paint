@@ -35,6 +35,14 @@
         _touchLines = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
         _completedStrokes = [[NSMutableArray alloc] init];
         _undoStrokes = [[NSMutableArray alloc] init];
+        
+        // Initialize playback state
+        _playbackStrokes = [[NSMutableArray alloc] init];
+        _currentPlaybackIndex = 0;
+        _isPlayingBack = NO;
+        _isPaused = NO;
+        _playbackInterval = 0.1;
+        
         self.opaque = NO;
         self.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
     }
@@ -48,6 +56,8 @@
 	CGColorRelease(strokeColor);
     [_completedStrokes release];
     [_undoStrokes release];
+    [_playbackStrokes release];
+    [_playbackTimer invalidate];
 	[super dealloc];
 }
 
@@ -56,8 +66,11 @@
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase {
     CGContextSetLineCap(context, kCGLineCapRound);
     
-    // Draw completed strokes first
-    for (NSDictionary* stroke in _completedStrokes) {
+    // Choose which strokes to draw based on playback state
+    NSArray* strokesToDraw = _isPlayingBack ? _playbackStrokes : _completedStrokes;
+    
+    // Draw strokes
+    for (NSDictionary* stroke in strokesToDraw) {
         NSMutableArray* points = [stroke objectForKey:@"points"];
         CGFloat width = [[stroke objectForKey:@"strokeWidth"] floatValue];
         CGFloat alpha = [[stroke objectForKey:@"strokeAlpha"] floatValue];
@@ -73,27 +86,32 @@
         } else if (applyErase) {
             CGContextSetBlendMode(context, kCGBlendModeClear);
         } else {
-            CGContextSetAlpha(context, 1);
-            CGContextSetStrokeColorWithColor(context, [[TiUtils colorValue:@"#000"] _color].CGColor);
+            // Show erase strokes with their original color (visual feedback)
+            CGContextSetAlpha(context, alpha);
+            CGContextSetBlendMode(context, kCGBlendModeNormal);
         }
         
         [self drawPointsArray:points inContext:context];
     }
     
-    // Draw current active strokes
-    CGContextSetLineWidth(context, strokeWidth);
-    CGContextSetStrokeColorWithColor(context, strokeColor);
-    if (!erase) {
-        CGContextSetAlpha(context, strokeAlpha);
-        CGContextSetBlendMode(context, kCGBlendModeNormal);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
-    } else if (applyErase) {
-        CGContextSetBlendMode(context, kCGBlendModeClear);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
-    } else {
-        CGContextSetAlpha(context, 1); // Erasing does not respect alpha, unfortunately.
-        CGContextSetStrokeColorWithColor(context, [[TiUtils colorValue:@"#000"] _color].CGColor);
-        CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+    // Draw current active strokes only if not in playback mode
+    if (!_isPlayingBack) {
+        CGContextSetLineWidth(context, strokeWidth);
+        CGContextSetStrokeColorWithColor(context, strokeColor);
+        if (!erase) {
+            CGContextSetAlpha(context, strokeAlpha);
+            CGContextSetBlendMode(context, kCGBlendModeNormal);
+            CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        } else if (applyErase) {
+            CGContextSetBlendMode(context, kCGBlendModeClear);
+            CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        } else {
+            // Show erase strokes with user's chosen color (visual feedback)
+            CGContextSetAlpha(context, strokeAlpha);
+            CGContextSetStrokeColorWithColor(context, strokeColor);
+            CGContextSetBlendMode(context, kCGBlendModeNormal);
+            CFDictionaryApplyFunction(_touchLines, drawPoints, context);
+        }
     }
 }
 
@@ -244,6 +262,81 @@ static void drawPoints(const void* key, const void* value, void* ctx)
     if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {
         [delegate readyToSavePaint];
     }
+}
+
+#pragma mark Playback Methods
+
+- (void)playbackDrawing:(NSTimeInterval)duration
+{
+    if ([_completedStrokes count] == 0) return;
+    
+    [self stopPlayback]; // Stop any existing playback
+    
+    _isPlayingBack = YES;
+    _isPaused = NO;
+    _currentPlaybackIndex = 0;
+    [_playbackStrokes removeAllObjects];
+    
+    _playbackInterval = duration / [_completedStrokes count];
+    
+    _playbackTimer = [NSTimer scheduledTimerWithTimeInterval:_playbackInterval
+                                                     repeats:YES
+                                                       block:^(NSTimer *timer) {
+        if (self->_currentPlaybackIndex < [self->_completedStrokes count] && self->_isPlayingBack && !self->_isPaused) {
+            [self->_playbackStrokes addObject:[self->_completedStrokes objectAtIndex:self->_currentPlaybackIndex]];
+            self->_currentPlaybackIndex++;
+            [self setNeedsDisplay];
+        } else if (self->_currentPlaybackIndex >= [self->_completedStrokes count]) {
+            [self stopPlayback];
+        }
+    }];
+}
+
+- (void)pausePlayback
+{
+    _isPaused = YES;
+}
+
+- (void)resumePlayback
+{
+    _isPaused = NO;
+}
+
+- (void)stopPlayback
+{
+    [_playbackTimer invalidate];
+    _playbackTimer = nil;
+    _isPlayingBack = NO;
+    _isPaused = NO;
+    _currentPlaybackIndex = 0;
+    [_playbackStrokes removeAllObjects];
+    [self setNeedsDisplay];
+}
+
+- (void)setPlaybackSpeed:(CGFloat)speed
+{
+    if (_playbackTimer && _isPlayingBack) {
+        NSTimeInterval newInterval = (_playbackInterval / speed);
+        [_playbackTimer invalidate];
+        
+        _playbackTimer = [NSTimer scheduledTimerWithTimeInterval:newInterval
+                                                         repeats:YES
+                                                           block:^(NSTimer *timer) {
+            if (self->_currentPlaybackIndex < [self->_completedStrokes count] && self->_isPlayingBack && !self->_isPaused) {
+                [self->_playbackStrokes addObject:[self->_completedStrokes objectAtIndex:self->_currentPlaybackIndex]];
+                self->_currentPlaybackIndex++;
+                [self setNeedsDisplay];
+            } else if (self->_currentPlaybackIndex >= [self->_completedStrokes count]) {
+                [self stopPlayback];
+            }
+        }];
+    }
+}
+
+- (CGFloat)getPlaybackProgress
+{
+    if ([_completedStrokes count] == 0) return 0.0;
+    return (CGFloat)_currentPlaybackIndex / (CGFloat)[_completedStrokes count];
 }
 
 @end

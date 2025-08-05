@@ -9,7 +9,8 @@
       "Bash(find:*)",
       "Bash(build/gradlew:*)",
       "Bash(java:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(ti build:*)"
     ],
     "deny": []
   }

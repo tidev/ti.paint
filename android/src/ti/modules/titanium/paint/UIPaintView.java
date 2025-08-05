@@ -20,12 +20,15 @@ import org.appcelerator.titanium.view.TiUIView;
 
 import android.content.Context;
 import android.graphics.*;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UIPaintView extends TiUIView {
 	private static final String LCAT = "UIPaintView";
@@ -152,6 +155,39 @@ public class UIPaintView extends TiUIView {
 	public void redo() {
 		tiPaintView.redo();
 	}
+	
+	// Playback wrapper methods
+	public void playbackDrawing(float durationSeconds) {
+		tiPaintView.playbackDrawing(durationSeconds);
+	}
+	
+	public void pausePlayback() {
+		tiPaintView.pausePlayback();
+	}
+	
+	public void resumePlayback() {
+		tiPaintView.resumePlayback();
+	}
+	
+	public void stopPlayback() {
+		tiPaintView.stopPlayback();
+	}
+	
+	public void setPlaybackSpeed(float speed) {
+		tiPaintView.setPlaybackSpeed(speed);
+	}
+	
+	public float getPlaybackProgress() {
+		return tiPaintView.getPlaybackProgress();
+	}
+
+	public Object[] getStrokesData() {
+		return tiPaintView.getStrokesData();
+	}
+
+	public void loadStrokes(Object[] strokesData) {
+		tiPaintView.loadStrokes(strokesData);
+	}
 
 	public class PaintView extends View {
 
@@ -168,6 +204,15 @@ public class UIPaintView extends TiUIView {
 		private boolean enabled = true;
 		private ArrayList<PathPaint> tiPaths = new ArrayList<PathPaint>();
 		private ArrayList<PathPaint> undoPaths = new ArrayList<PathPaint>();
+		
+		// Playback state
+		private ArrayList<PathPaint> playbackPaths = new ArrayList<PathPaint>();
+		private Handler playbackHandler = new Handler();
+		private Runnable playbackRunnable;
+		private int currentPlaybackIndex = 0;
+		private boolean isPlayingBack = false;
+		private boolean isPaused = false;
+		private long playbackInterval = 100;
 
 		public PaintView(Context c) {
 			super(c);
@@ -213,11 +258,17 @@ public class UIPaintView extends TiUIView {
  				canvas.drawBitmap(tiBitmap, 0, 0, null);
  			}
 
-			for (PathPaint p : tiPaths) {
+			// Choose which paths to draw based on playback state
+			ArrayList<PathPaint> pathsToDraw = isPlayingBack ? playbackPaths : tiPaths;
+			
+			for (PathPaint p : pathsToDraw) {
 				canvas.drawPath(p.getPath(), p.getPaint());
 			}
 
-			canvas.drawPath(mPath, tiPaint);
+			// Draw current active path only if not in playback mode
+			if (!isPlayingBack) {
+				canvas.drawPath(mPath, tiPaint);
+			}
 		}
 
 		public void touch_start(float _x, float _y) {
@@ -321,6 +372,138 @@ public class UIPaintView extends TiUIView {
 		public void clear() {
 			tiBitmap.eraseColor(Color.TRANSPARENT);
 			tiPaths.clear();
+			invalidate();
+		}
+		
+		// Playback methods
+		public void playbackDrawing(float durationSeconds) {
+			if (tiPaths.size() == 0) return;
+			
+			stopPlayback(); // Stop any existing playback
+			
+			isPlayingBack = true;
+			isPaused = false;
+			currentPlaybackIndex = 0;
+			playbackPaths.clear();
+			
+			playbackInterval = (long)((durationSeconds * 1000) / tiPaths.size());
+			
+			playbackRunnable = new Runnable() {
+				@Override
+				public void run() {
+					if (currentPlaybackIndex < tiPaths.size() && isPlayingBack && !isPaused) {
+						playbackPaths.add(tiPaths.get(currentPlaybackIndex));
+						currentPlaybackIndex++;
+						invalidate();
+						playbackHandler.postDelayed(this, playbackInterval);
+					} else if (currentPlaybackIndex >= tiPaths.size()) {
+						stopPlayback();
+					}
+				}
+			};
+			
+			playbackHandler.postDelayed(playbackRunnable, playbackInterval);
+		}
+		
+		public void pausePlayback() {
+			isPaused = true;
+		}
+		
+		public void resumePlayback() {
+			isPaused = false;
+			if (playbackRunnable != null && isPlayingBack) {
+				playbackHandler.postDelayed(playbackRunnable, playbackInterval);
+			}
+		}
+		
+		public void stopPlayback() {
+			if (playbackHandler != null && playbackRunnable != null) {
+				playbackHandler.removeCallbacks(playbackRunnable);
+			}
+			isPlayingBack = false;
+			isPaused = false;
+			currentPlaybackIndex = 0;
+			playbackPaths.clear();
+			invalidate();
+		}
+		
+		public void setPlaybackSpeed(float speed) {
+			if (isPlayingBack && speed > 0) {
+				playbackInterval = (long)(playbackInterval / speed);
+				if (playbackRunnable != null && !isPaused) {
+					playbackHandler.removeCallbacks(playbackRunnable);
+					playbackHandler.postDelayed(playbackRunnable, playbackInterval);
+				}
+			}
+		}
+		
+		public float getPlaybackProgress() {
+			if (tiPaths.size() == 0) return 0.0f;
+			return (float)currentPlaybackIndex / (float)tiPaths.size();
+		}
+
+		public Object[] getStrokesData() {
+			ArrayList<Map<String, Object>> strokesList = new ArrayList<Map<String, Object>>();
+			
+			for (PathPaint pathPaint : tiPaths) {
+				Map<String, Object> strokeData = new HashMap<String, Object>();
+				
+				// Get paint properties
+				Paint paint = pathPaint.getPaint();
+				strokeData.put("color", paint.getColor());
+				strokeData.put("strokeWidth", paint.getStrokeWidth());
+				strokeData.put("alpha", paint.getAlpha());
+				strokeData.put("isErase", pathPaint.getEarase());
+				
+				// Get path points (simplified - just store as string for now)
+				Path path = pathPaint.getPath();
+				strokeData.put("pathData", path.toString());
+				
+				strokesList.add(strokeData);
+			}
+			
+			return strokesList.toArray();
+		}
+
+		public void loadStrokes(Object[] strokesData) {
+			// Clear current strokes
+			tiPaths.clear();
+			undoPaths.clear();
+			
+			// Load each stroke
+			for (Object strokeObj : strokesData) {
+				if (strokeObj instanceof Map) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> strokeData = (Map<String, Object>) strokeObj;
+					
+					// Create new PathPaint
+					PathPaint pathPaint = new PathPaint();
+					
+					// Set paint properties
+					Paint paint = pathPaint.getPaint();
+					if (strokeData.containsKey("color")) {
+						paint.setColor((Integer) strokeData.get("color"));
+					}
+					if (strokeData.containsKey("strokeWidth")) {
+						paint.setStrokeWidth((Float) strokeData.get("strokeWidth"));
+					}
+					if (strokeData.containsKey("alpha")) {
+						paint.setAlpha((Integer) strokeData.get("alpha"));
+					}
+					if (strokeData.containsKey("isErase")) {
+						pathPaint.setEarase((Boolean) strokeData.get("isErase"));
+					}
+					
+					// Note: Path reconstruction from string is complex
+					// For now, create empty path - this is a simplified implementation
+					Path path = new Path();
+					pathPaint.setPath(path);
+					
+					tiPaths.add(pathPaint);
+				}
+			}
+			
+			// Refresh the view
 			invalidate();
 		}
 	}

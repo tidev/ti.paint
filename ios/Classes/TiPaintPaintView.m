@@ -152,6 +152,41 @@
     return nil;
 }
 
+#pragma mark Playback Wrapper Methods
+
+- (void)playbackDrawing:(id)args
+{
+    NSNumber* duration = (NSNumber*)args;
+    [wetPaintView playbackDrawing:[duration doubleValue]];
+}
+
+- (void)pausePlayback:(id)args
+{
+    [wetPaintView pausePlayback];
+}
+
+- (void)resumePlayback:(id)args
+{
+    [wetPaintView resumePlayback];
+}
+
+- (void)stopPlayback:(id)args
+{
+    [wetPaintView stopPlayback];
+}
+
+- (void)setPlaybackSpeed:(id)args
+{
+    NSNumber* speed = (NSNumber*)args;
+    [wetPaintView setPlaybackSpeed:[speed floatValue]];
+}
+
+- (CGFloat)getPlaybackProgress
+{
+    return [wetPaintView getPlaybackProgress];
+}
+
+
 #pragma mark Events
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{

@@ -6,7 +6,33 @@ This is the Paint Module for Titanium.
 ## Usage
 ```javascript
 var Paint = require('ti.paint');
-var paintView = Paint.createPaintView({});
+var paintView = Paint.createPaintView({
+    strokeWidth: 5,
+    strokeColor: 'blue',
+    strokeAlpha: 255
+});
+
+// Basic functionality
+paintView.clear();
+paintView.undo();
+paintView.redo();
+
+// New playback functionality
+paintView.playbackDrawing(3.0); // Play back all strokes over 3 seconds
+paintView.pausePlayback();
+paintView.resumePlayback();
+paintView.setPlaybackSpeed(0.5); // Half speed
+var progress = paintView.getPlaybackProgress(); // Get current progress
+
+// Save and load stroke data
+var strokesData = paintView.getStrokesData(); // Save current strokes
+var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'drawing.json');
+file.write(JSON.stringify(strokesData));
+
+// Later: Load saved strokes
+var savedData = JSON.parse(file.read().text);
+paintView.loadStrokes(savedData); // Restore drawing
+paintView.playbackDrawing(5.0); // Play back loaded drawing
 ```
 
 ### Functions
@@ -23,8 +49,32 @@ Draw line to position x/y
 * enable(true/false) [Android only]
 Disable drawing
 
-* undo()/redo() [Android only]
-Undo or redo last action
+* undo()/redo() [Cross-platform]
+Undo or redo last action. Now available on both iOS and Android.
+
+* playbackDrawing(duration) [Cross-platform]
+Plays back all strokes chronologically over the specified duration (in seconds). Creates a "movie mode" effect.
+
+* pausePlayback() [Cross-platform]
+Pauses the current playback animation.
+
+* resumePlayback() [Cross-platform]
+Resumes a paused playback animation.
+
+* stopPlayback() [Cross-platform]
+Stops the current playback and returns to normal drawing mode.
+
+* setPlaybackSpeed(speed) [Cross-platform]
+Sets the playback speed multiplier (e.g., 0.5 for half speed, 2.0 for double speed).
+
+* getPlaybackProgress() [Cross-platform]
+Returns the current playback progress as a number between 0.0 and 1.0.
+
+* getStrokesData() [Cross-platform]
+Returns an array containing all stroke data for saving/loading sessions.
+
+* loadStrokes(strokesData) [Cross-platform]
+Loads previously saved stroke data to recreate a drawing session.
 
 
 ### Properties

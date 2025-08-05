@@ -22,6 +22,14 @@
     CFMutableDictionaryRef _touchLines;
     NSMutableArray* _completedStrokes;
     NSMutableArray* _undoStrokes;
+    
+    // Playback state
+    NSTimer* _playbackTimer;
+    NSMutableArray* _playbackStrokes;
+    NSInteger _currentPlaybackIndex;
+    BOOL _isPlayingBack;
+    BOOL _isPaused;
+    NSTimeInterval _playbackInterval;
 }
 
 @property CGFloat strokeWidth;
@@ -34,5 +42,13 @@
 - (void)undo;
 - (void)redo;
 - (void)bakeStrokesToDelegate;
+
+// Playback methods
+- (void)playbackDrawing:(NSTimeInterval)duration;
+- (void)pausePlayback;
+- (void)resumePlayback;
+- (void)stopPlayback;
+- (void)setPlaybackSpeed:(CGFloat)speed;
+- (CGFloat)getPlaybackProgress;
 
 @end
