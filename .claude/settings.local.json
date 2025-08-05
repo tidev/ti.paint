@@ -10,7 +10,8 @@
       "Bash(build/gradlew:*)",
       "Bash(java:*)",
       "Bash(python:*)",
-      "Bash(ti build:*)"
+      "Bash(ti build:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

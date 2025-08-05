@@ -39,6 +39,7 @@
 @property (nonatomic, assign) id<WetPaintViewDelegate> delegate;
 
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase;
+- (void)clear;
 - (void)undo;
 - (void)redo;
 - (void)bakeStrokesToDelegate;
@@ -50,5 +51,9 @@
 - (void)stopPlayback;
 - (void)setPlaybackSpeed:(CGFloat)speed;
 - (CGFloat)getPlaybackProgress;
+
+// Save/Load methods
+- (NSArray*)getStrokesData;
+- (void)loadStrokes:(NSArray*)strokesArray;
 
 @end

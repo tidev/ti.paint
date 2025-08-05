@@ -71,4 +71,20 @@
 	return [NSNumber numberWithFloat:result];
 }
 
+// Save/Load methods
+-(NSArray*)getStrokesData:(id)args
+{
+	__block NSArray* result = nil;
+	TiThreadPerformOnMainThread(^{
+		TiPaintPaintView* paintView = (TiPaintPaintView*)[self view];
+		result = [paintView getStrokesData];
+	}, YES);
+	return result;
+}
+
+-(void)loadStrokes:(id)args
+{
+	[[self view] performSelectorOnMainThread:@selector(loadStrokes:) withObject:args waitUntilDone:NO];
+}
+
 @end

@@ -387,6 +387,10 @@ public class UIPaintView extends TiUIView {
 			playbackPaths.clear();
 			
 			playbackInterval = (long)((durationSeconds * 1000) / tiPaths.size());
+			// Ensure reasonable maximum interval (no more than 1 second between strokes)
+			if (playbackInterval > 1000) {
+				playbackInterval = 1000;
+			}
 			
 			playbackRunnable = new Runnable() {
 				@Override
@@ -450,14 +454,20 @@ public class UIPaintView extends TiUIView {
 				
 				// Get paint properties
 				Paint paint = pathPaint.getPaint();
-				strokeData.put("color", paint.getColor());
-				strokeData.put("strokeWidth", paint.getStrokeWidth());
-				strokeData.put("alpha", paint.getAlpha());
+				
+				// Convert color to hex string (match iOS format)
+				int color = paint.getColor();
+				String hexColor = String.format("#%06x", color & 0xFFFFFF);
+				strokeData.put("color", hexColor);
+				
+				strokeData.put("strokeWidth", (double)paint.getStrokeWidth());
+				strokeData.put("alpha", paint.getAlpha()); // Keep as 'alpha' for compatibility
 				strokeData.put("isErase", pathPaint.getEarase());
 				
-				// Get path points (simplified - just store as string for now)
-				Path path = pathPaint.getPath();
-				strokeData.put("pathData", path.toString());
+				// For now, create empty points array (path reconstruction complex)
+				// TODO: Implement proper path point serialization if needed
+				ArrayList<Map<String, Object>> points = new ArrayList<Map<String, Object>>();
+				strokeData.put("points", points);
 				
 				strokesList.add(strokeData);
 			}
@@ -482,10 +492,13 @@ public class UIPaintView extends TiUIView {
 					// Set paint properties
 					Paint paint = pathPaint.getPaint();
 					if (strokeData.containsKey("color")) {
-						paint.setColor((Integer) strokeData.get("color"));
+						String hexColor = (String) strokeData.get("color");
+						int color = parseHexColor(hexColor);
+						paint.setColor(color);
 					}
 					if (strokeData.containsKey("strokeWidth")) {
-						paint.setStrokeWidth((Float) strokeData.get("strokeWidth"));
+						Double width = (Double) strokeData.get("strokeWidth");
+						paint.setStrokeWidth(width.floatValue());
 					}
 					if (strokeData.containsKey("alpha")) {
 						paint.setAlpha((Integer) strokeData.get("alpha"));
@@ -505,6 +518,17 @@ public class UIPaintView extends TiUIView {
 			
 			// Refresh the view
 			invalidate();
+		}
+		
+		private int parseHexColor(String hexColor) {
+			if (hexColor == null || !hexColor.startsWith("#")) {
+				return android.graphics.Color.BLACK;
+			}
+			try {
+				return android.graphics.Color.parseColor(hexColor);
+			} catch (IllegalArgumentException e) {
+				return android.graphics.Color.BLACK;
+			}
 		}
 	}
 

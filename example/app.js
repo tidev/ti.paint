@@ -1,170 +1,268 @@
 let Paint = require('ti.paint');
 
 let win = Ti.UI.createWindow({
-	backgroundColor: '#fff'
+  backgroundColor: '#fff',
+  title: 'Ti.Paint Example - All Features'
 });
 
 let paintView = Paint.createPaintView({
-	top: 0,
-	right: 0,
-	bottom: 80,
-	left: 0,
-	// strokeWidth (float), strokeColor (string), strokeAlpha (int, 0-255)
-	strokeColor: '#0f0',
-	strokeAlpha: 255,
-	strokeWidth: 10,
-	eraseMode: false
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 120,
+  strokeWidth: 10,
+  eraseMode: false,
+  strokeAlpha: 255,
+  strokeColor: '#0f0'
 });
 
 win.add(paintView);
 
+// Row 1: Basic Controls
 let buttonStrokeWidth = Ti.UI.createButton({
-	height: 40,
-	left: 10,
-	bottom: 10,
-	right: 10,
-	title: 'Decrease Stroke Width'
+  left: 5,
+  width: 80,
+  height: 35,
+  bottom: 80,
+  title: 'Width: 10'
 });
 
-buttonStrokeWidth.addEventListener('click', function(e) {
-	paintView.strokeWidth = (paintView.strokeWidth === 50) ? 25 : 50;
-	e.source.title = (paintView.strokeWidth === 50) ? 'Decrease Stroke Width' : 'Increase Stroke Width';
+buttonStrokeWidth.addEventListener('click', function (e) {
+  paintView.strokeWidth = (paintView.strokeWidth === 50) ? 10 : 50;
+  e.source.title = 'Width: ' + paintView.strokeWidth;
 });
 
+let buttonRed = Ti.UI.createButton({
+  left: 90,
+  width: 50,
+  height: 35,
+  bottom: 80,
+  title: 'Red'
+});
+
+buttonRed.addEventListener('click', function () {
+  paintView.strokeColor = 'red';
+});
+
+let buttonGreen = Ti.UI.createButton({
+  left: 145,
+  width: 50,
+  height: 35,
+  bottom: 80,
+  title: 'Green'
+});
+
+buttonGreen.addEventListener('click', function () {
+  paintView.strokeColor = '#0f0';
+});
+
+let buttonBlue = Ti.UI.createButton({
+  left: 200,
+  width: 50,
+  height: 35,
+  bottom: 80,
+  title: 'Blue'
+});
+
+buttonBlue.addEventListener('click', function () {
+  paintView.strokeColor = '#0000ff';
+});
+
+let buttonClear = Ti.UI.createButton({
+  left: 255,
+  width: 50,
+  height: 35,
+  bottom: 80,
+  title: 'Clear'
+});
+
+buttonClear.addEventListener('click', function () {
+  paintView.clear();
+});
+
+// Row 2: Universal Undo/Redo (works on both iOS and Android now!)
+let buttonUndo = Ti.UI.createButton({
+  left: 5,
+  width: 60,
+  height: 35,
+  bottom: 40,
+  title: 'Undo'
+});
+
+buttonUndo.addEventListener('click', function () {
+  paintView.undo();
+});
+
+let buttonRedo = Ti.UI.createButton({
+  left: 70,
+  width: 60,
+  height: 35,
+  bottom: 40,
+  title: 'Redo'
+});
+
+buttonRedo.addEventListener('click', function () {
+  paintView.redo();
+});
+
+// Alpha and Erase controls
+let buttonAlpha = Ti.UI.createButton({
+  left: 135,
+  width: 80,
+  height: 35,
+  bottom: 40,
+  title: 'Alpha: 100%'
+});
+
+buttonAlpha.addEventListener('click', function (e) {
+  paintView.strokeAlpha = (paintView.strokeAlpha === 255) ? 127 : 255;
+  e.source.title = (paintView.strokeAlpha === 255) ? 'Alpha: 100%' : 'Alpha: 50%';
+});
+
+let buttonErase = Ti.UI.createButton({
+  left: 220,
+  width: 80,
+  height: 35,
+  bottom: 40,
+  title: 'Erase: Off'
+});
+
+buttonErase.addEventListener('click', function (e) {
+  paintView.eraseMode = !paintView.eraseMode;
+  e.source.title = paintView.eraseMode ? 'Erase: On' : 'Erase: Off';
+});
+
+// Row 3: NEW Playback Controls (Cross-Platform Movie Mode!)
+let buttonPlayback = Ti.UI.createButton({
+  left: 5,
+  bottom: 5,
+  width: 80,
+  height: 35,
+  title: 'Play 5s'
+});
+
+let isPlaybackRunning = false;
+
+buttonPlayback.addEventListener('click', function (e) {
+  if (!isPlaybackRunning) {
+    paintView.playbackDrawing(5.0); // 5 second playback
+    isPlaybackRunning = true;
+    e.source.title = 'Playing...';
+
+    // Reset button after 5 seconds
+    setTimeout(function () {
+      isPlaybackRunning = false;
+      e.source.title = 'Play 5s';
+    }, 5000);
+  }
+});
+
+let buttonPause = Ti.UI.createButton({
+  left: 90,
+  bottom: 5,
+  width: 50,
+  height: 35,
+  title: 'Pause'
+});
+
+buttonPause.addEventListener('click', function () {
+  paintView.pausePlayback();
+});
+
+let buttonResume = Ti.UI.createButton({
+  left: 145,
+  bottom: 5,
+  width: 55,
+  height: 35,
+  title: 'Resume'
+});
+
+buttonResume.addEventListener('click', function () {
+  paintView.resumePlayback();
+});
+
+let buttonStop = Ti.UI.createButton({
+  left: 205,
+  bottom: 5,
+  width: 50,
+  height: 35,
+  title: 'Stop'
+});
+
+buttonStop.addEventListener('click', function () {
+  paintView.stopPlayback();
+  isPlaybackRunning = false;
+  buttonPlayback.title = 'Play 5s';
+});
+
+// NEW: Save/Load Strokes (Cross-Platform Persistence!)
+let strokesFile = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'strokes.json');
+let hasSavedStrokes = strokesFile.exists();
+
+let buttonSaveLoad = Ti.UI.createButton({
+  right: 5,
+  bottom: 5,
+  width: 65,
+  height: 35,
+  title: hasSavedStrokes ? 'Load' : 'Save'
+});
+
+buttonSaveLoad.addEventListener('click', function (e) {
+  if (!hasSavedStrokes) {
+    // Save current strokes
+    let strokesData = paintView.getStrokesData();
+    strokesFile.write(JSON.stringify(strokesData));
+    hasSavedStrokes = true;
+    e.source.title = 'Load';
+    Ti.API.info('Strokes saved! Draw something new, then press Load to restore.');
+  } else {
+    // Load saved strokes
+    if (strokesFile.exists()) {
+      let savedData = JSON.parse(strokesFile.read().text);
+      paintView.loadStrokes(savedData);
+      hasSavedStrokes = false;
+      e.source.title = 'Save';
+      Ti.API.info('Strokes loaded! Press Play to see the drawing replay.');
+    }
+  }
+});
+
+// Add all buttons to window
 win.add(buttonStrokeWidth);
+win.add(buttonRed);
+win.add(buttonGreen);
+win.add(buttonBlue);
+win.add(buttonClear);
+win.add(buttonUndo);
+win.add(buttonRedo);
+win.add(buttonAlpha);
+win.add(buttonErase);
+win.add(buttonPlayback);
+win.add(buttonPause);
+win.add(buttonResume);
+win.add(buttonStop);
+win.add(buttonSaveLoad);
 
-let buttonStrokeColorRed = Ti.UI.createButton({
-	height: 40,
-	bottom: 100,
-	left: 10,
-	title: 'Red'
+// Touch event listeners (for debugging/monitoring)
+paintView.addEventListener('touchcancel', function (e) {
+  Ti.API.info('Paint: touch cancel');
+});
+paintView.addEventListener('touchend', function (e) {
+  Ti.API.info('Paint: touch end');
+});
+paintView.addEventListener('touchmove', function (e) {
+  // Ti.API.info('Paint: touch move'); // Too verbose, uncomment if needed
+});
+paintView.addEventListener('touchstart', function (e) {
+  Ti.API.info('Paint: touch start');
 });
 
-buttonStrokeColorRed.addEventListener('click', function() {
-	paintView.strokeColor = 'red';
-});
-
-let buttonStrokeColorGreen = Ti.UI.createButton({
-	height: 40,
-	bottom: 70,
-	left: 10,
-	title: 'Green'
-});
-
-buttonStrokeColorGreen.addEventListener('click', function() {
-	paintView.strokeColor = '#0f0';
-});
-
-let buttonStrokeColorBlue = Ti.UI.createButton({
-	height: 40,
-	bottom: 40,
-	left: 10,
-	title: 'Blue'
-});
-
-buttonStrokeColorBlue.addEventListener('click', function() {
-	paintView.strokeColor = '#0000ff';
-});
-
-win.add(buttonStrokeColorRed);
-win.add(buttonStrokeColorGreen);
-win.add(buttonStrokeColorBlue);
-
-let clear = Ti.UI.createButton({
-	height: 40,
-	bottom: 40,
-	left: 100,
-	title: 'Clear'
-});
-
-clear.addEventListener('click', function() {
-	paintView.clear();
-});
-
-win.add(clear);
-
-if (OS_ANDROID) {
-	let undo = Ti.UI.createButton({
-		height: 40,
-		bottom: 70,
-		left: 100,
-		title: 'undo'
-	});
-
-	undo.addEventListener('click', function() {
-		paintView.undo();
-	});
-
-	win.add(undo);
-
-	let redo = Ti.UI.createButton({
-		height: 40,
-		bottom: 100,
-		left: 100,
-		title: 'redo'
-	});
-
-	redo.addEventListener('click', function() {
-		paintView.redo();
-	});
-
-	win.add(redo);
-}
-
-let isSaved = false;
-
-let buttonLoadSave = Ti.UI.createButton({
-	height: 40,
-	bottom: 100,
-	right: 10,
-	title: 'Save/Load'
-});
-
-buttonLoadSave.addEventListener('click', function(e) {
-	let file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, "tmp.jpg");
-	if (!isSaved) {
-		paintView.toImage(function(blob) {
-			file.write(blob);
-			alert("done");
-		})
-	} else {
-		paintView.image = file.nativePath
-	}
-	isSaved = !isSaved;
-});
-
-let buttonStrokeAlpha = Ti.UI.createButton({
-	height: 40,
-	bottom: 70,
-	right: 10,
-	title: 'Alpha : 100%'
-});
-
-buttonStrokeAlpha.addEventListener('click', function(e) {
-	paintView.strokeAlpha = (paintView.strokeAlpha === 255) ? 127 : 255;
-	e.source.title = (paintView.strokeAlpha === 255) ? 'Alpha : 100%' : 'Alpha : 50%';
-});
-
-win.add(buttonStrokeAlpha);
-
-let buttonStrokeColorEraser = Ti.UI.createButton({
-	height: 40,
-	bottom: 40,
-	right: 10,
-	title: 'Erase : Off'
-});
-
-buttonStrokeColorEraser.addEventListener('click', function(e) {
-	paintView.eraseMode = (paintView.eraseMode) ? false : true;
-	e.source.title = (paintView.eraseMode) ? 'Erase : On' : 'Erase : Off';
-});
-
-win.add(buttonStrokeColorEraser);
-win.add(buttonLoadSave);
-
-paintView.addEventListener('touchcancel', function(e) { });
-paintView.addEventListener('touchend', function(e) { });
-paintView.addEventListener('touchmove', function(e) { });
-paintView.addEventListener('touchstart', function(e) { });
+// Instructions
+Ti.API.info('=== Ti.Paint v6.0.0/3.0.0 - All Features Demo ===');
+Ti.API.info('1. Draw something with your finger');
+Ti.API.info('2. Use Undo/Redo (now works on both iOS & Android!)');
+Ti.API.info('3. Save your drawing, clear canvas, then Load to restore');
+Ti.API.info('4. Press "Play 5s" to replay your drawing as a movie!');
+Ti.API.info('5. Use Pause/Resume/Stop to control playback');
 
 win.open();

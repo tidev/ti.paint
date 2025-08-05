@@ -6,6 +6,7 @@
 
 #import "TiPaintPaintView.h"
 #import "TiUtils.h"
+#import "TiBlob.h"
 
 @implementation TiPaintPaintView
 
@@ -129,6 +130,7 @@
     if (drawImage != nil) {
         drawImage.image = nil;
     }
+    [wetPaintView clear];
 }
 
 - (void)undo:(id)args
@@ -147,7 +149,7 @@
     [wetPaintView bakeStrokesToDelegate];
     
     if ([self imageView].image != nil) {
-        return [TiUtils toBlob:[self imageView].image];
+        return [TiBlob blobFromImage:[self imageView].image];
     }
     return nil;
 }
@@ -156,7 +158,7 @@
 
 - (void)playbackDrawing:(id)args
 {
-    NSNumber* duration = (NSNumber*)args;
+    NSNumber* duration = [args count] > 0 ? [args objectAtIndex:0] : @(5.0);
     [wetPaintView playbackDrawing:[duration doubleValue]];
 }
 
@@ -186,6 +188,18 @@
     return [wetPaintView getPlaybackProgress];
 }
 
+#pragma mark Save/Load Methods
+
+- (NSArray*)getStrokesData
+{
+    return [wetPaintView getStrokesData];
+}
+
+- (void)loadStrokes:(id)args
+{
+    NSArray* strokesArray = [args count] > 0 ? [args objectAtIndex:0] : @[];
+    [wetPaintView loadStrokes:strokesArray];
+}
 
 #pragma mark Events
 

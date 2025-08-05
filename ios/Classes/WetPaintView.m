@@ -234,7 +234,14 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 	[super touchesEnded:touches withEvent:event];
 }
 
-#pragma mark Undo/Redo
+#pragma mark Clear/Undo/Redo
+
+- (void)clear {
+    [_completedStrokes removeAllObjects];
+    [_undoStrokes removeAllObjects];
+    CFDictionaryRemoveAllValues(_touchLines);
+    [self setNeedsDisplay];
+}
 
 - (void)undo
 {
@@ -278,6 +285,10 @@ static void drawPoints(const void* key, const void* value, void* ctx)
     [_playbackStrokes removeAllObjects];
     
     _playbackInterval = duration / [_completedStrokes count];
+    // Ensure reasonable maximum interval (no more than 1 second between strokes)
+    if (_playbackInterval > 1.0) {
+        _playbackInterval = 1.0;
+    }
     
     _playbackTimer = [NSTimer scheduledTimerWithTimeInterval:_playbackInterval
                                                      repeats:YES
@@ -337,6 +348,138 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 {
     if ([_completedStrokes count] == 0) return 0.0;
     return (CGFloat)_currentPlaybackIndex / (CGFloat)[_completedStrokes count];
+}
+
+#pragma mark Save/Load Methods
+
+- (NSArray*)getStrokesData
+{
+    NSMutableArray* strokesData = [[NSMutableArray alloc] init];
+    
+    for (NSDictionary* stroke in _completedStrokes) {
+        NSMutableDictionary* strokeData = [[NSMutableDictionary alloc] init];
+        
+        // Get stroke properties
+        NSArray* points = [stroke objectForKey:@"points"];
+        NSNumber* width = [stroke objectForKey:@"strokeWidth"];
+        NSNumber* alpha = [stroke objectForKey:@"strokeAlpha"];
+        id colorObj = [stroke objectForKey:@"color"];
+        NSNumber* isErase = [stroke objectForKey:@"erase"];
+        
+        if (points) {
+            NSMutableArray* pointsArray = [[NSMutableArray alloc] init];
+            for (NSValue* pointValue in points) {
+                CGPoint point = [pointValue CGPointValue];
+                NSDictionary* pointDict = @{
+                    @"x": @(point.x),
+                    @"y": @(point.y)
+                };
+                [pointsArray addObject:pointDict];
+            }
+            [strokeData setObject:pointsArray forKey:@"points"];
+        }
+        if (width) [strokeData setObject:width forKey:@"strokeWidth"];
+        if (alpha) [strokeData setObject:alpha forKey:@"alpha"];
+        [strokeData setObject:(isErase ? isErase : @(NO)) forKey:@"isErase"];
+        
+        // Convert CGColor to hex string
+        if (colorObj) {
+            CGColorRef color = (__bridge CGColorRef)colorObj;
+            const CGFloat* components = CGColorGetComponents(color);
+            size_t numComponents = CGColorGetNumberOfComponents(color);
+            
+            // DEBUG: Log color components
+            NSLog(@"DEBUG: Color has %zu components", numComponents);
+            for (size_t i = 0; i < numComponents; i++) {
+                NSLog(@"DEBUG: Component %zu = %f", i, components[i]);
+            }
+            
+            int red = 0, green = 0, blue = 0;
+            if (numComponents >= 3) {
+                red = (int)(components[0] * 255);
+                green = (int)(components[1] * 255);
+                blue = (int)(components[2] * 255);
+            } else if (numComponents >= 1) {
+                // Grayscale color
+                red = green = blue = (int)(components[0] * 255);
+            }
+            
+            NSString* hexColor = [NSString stringWithFormat:@"#%02x%02x%02x", red, green, blue];
+            NSLog(@"DEBUG: Final hex color: %@", hexColor);
+            [strokeData setObject:hexColor forKey:@"color"];
+        } else {
+            NSLog(@"DEBUG: No color object, using black");
+            [strokeData setObject:@"#000000" forKey:@"color"];
+        }
+        
+        [strokesData addObject:strokeData];
+    }
+    
+    return strokesData;
+}
+
+- (void)loadStrokes:(NSArray*)strokesArray
+{
+    [_completedStrokes removeAllObjects];
+    [_undoStrokes removeAllObjects];
+    
+    for (NSDictionary* strokeData in strokesArray) {
+        NSMutableDictionary* stroke = [[NSMutableDictionary alloc] init];
+        
+        // Get stroke data
+        NSArray* points = [strokeData objectForKey:@"points"];
+        NSNumber* width = [strokeData objectForKey:@"strokeWidth"];
+        NSNumber* alpha = [strokeData objectForKey:@"alpha"];
+        NSString* hexColor = [strokeData objectForKey:@"color"];
+        NSNumber* isErase = [strokeData objectForKey:@"isErase"];
+        
+        if (points) {
+            NSMutableArray* pointsArray = [[NSMutableArray alloc] init];
+            for (NSDictionary* pointDict in points) {
+                CGFloat x = [[pointDict objectForKey:@"x"] floatValue];
+                CGFloat y = [[pointDict objectForKey:@"y"] floatValue];
+                CGPoint point = CGPointMake(x, y);
+                [pointsArray addObject:[NSValue valueWithCGPoint:point]];
+            }
+            [stroke setObject:pointsArray forKey:@"points"];
+        }
+        if (width) [stroke setObject:width forKey:@"strokeWidth"];
+        if (alpha) [stroke setObject:alpha forKey:@"strokeAlpha"];
+        if (isErase) [stroke setObject:isErase forKey:@"erase"];
+        
+        // Convert hex string to CGColor
+        if (hexColor) {
+            UIColor* uiColor = [self colorFromHexString:hexColor];
+            [stroke setObject:(__bridge id)[uiColor CGColor] forKey:@"color"];
+        }
+        
+        [_completedStrokes addObject:stroke];
+    }
+    
+    [self setNeedsDisplay];
+}
+
+- (UIColor*)colorFromHexString:(NSString*)hexString {
+    NSString* cleanString = [hexString stringByReplacingOccurrencesOfString:@"#" withString:@""];
+    if ([cleanString length] == 3) {
+        cleanString = [NSString stringWithFormat:@"%@%@%@%@%@%@",
+                      [cleanString substringWithRange:NSMakeRange(0, 1)],[cleanString substringWithRange:NSMakeRange(0, 1)],
+                      [cleanString substringWithRange:NSMakeRange(1, 1)],[cleanString substringWithRange:NSMakeRange(1, 1)],
+                      [cleanString substringWithRange:NSMakeRange(2, 1)],[cleanString substringWithRange:NSMakeRange(2, 1)]];
+    }
+    if ([cleanString length] == 6) {
+        cleanString = [cleanString stringByAppendingString:@"ff"];
+    }
+    
+    unsigned int baseValue;
+    [[NSScanner scannerWithString:cleanString] scanHexInt:&baseValue];
+    
+    float red = ((baseValue >> 24) & 0xFF)/255.0f;
+    float green = ((baseValue >> 16) & 0xFF)/255.0f;
+    float blue = ((baseValue >> 8) & 0xFF)/255.0f;
+    float alpha = ((baseValue >> 0) & 0xFF)/255.0f;
+    
+    return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
 }
 
 @end
