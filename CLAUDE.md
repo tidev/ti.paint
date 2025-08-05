@@ -1,7 +1,13 @@
 # Ti.Paint Module - Project Documentation
 
 ## Project Overview
-Ti.Paint is a cross-platform Titanium module that provides a paint surface user interface view for iOS, Android, and Windows platforms.
+**Ti.Paint is a CROSS-PLATFORM TITANIUM SDK MODULE** that provides a paint surface user interface view for iOS, Android, and Windows platforms.
+
+### 🎯 **Module Type**: Native Titanium SDK Module (Multi-platform)
+- **Framework**: Titanium Mobile SDK
+- **Languages**: Objective-C (iOS), Java (Android), C++ (Windows)
+- **Distribution**: Native module (.zip files for each platform)
+- **Integration**: JavaScript API exposed to Titanium applications
 
 ## Current Status (Updated August 2025)
 
@@ -80,29 +86,43 @@ Ti.Paint is a cross-platform Titanium module that provides a paint surface user 
 
 ## Development Commands
 
-### Building the Module
+### Building the Titanium Module
 ```bash
-# Android (from android/ directory)
-build/gradlew -p build clean build
+# ✅ CORRECT - Official Titanium Module Build Commands
+# iOS (from ios/ directory)
+ti build -p ios --build-only
 
-# iOS (COMPILE FIRST before adding methods)
-xcodebuild -project paint.xcodeproj -scheme paint -configuration Release -destination "generic/platform=iOS"
+# Android (from android/ directory)  
+ti build -p android --build-only
 
-# Using Titanium CLI (if working)
-titanium build -p android -T module
-titanium build -p ios -T module
+# ❌ WRONG - These are for apps, not modules
+# titanium build -p android -T module
+# titanium build -p ios -T module
+
+# ❌ WRONG - Direct Xcode build (doesn't generate .zip)
+# xcodebuild -project paint.xcodeproj -scheme paint -configuration Release
 ```
 
 ## Development Best Practices ⚠️
+**IMPORTANT**: This is a **TITANIUM SDK MODULE**, not a regular iOS/Android app!
+
+### Titanium Module Development - ESSENTIAL RULES
+1. **Use `ti build -p [platform] --build-only`** - Official Titanium module build command
+2. **Cross-platform API consistency** - iOS and Android must have identical JavaScript APIs
+3. **Module manifest versions** - Update version numbers in manifest files
+4. **Distribution via .zip files** - Generated in respective `dist/` directories
+5. **Native code exposes JavaScript APIs** - @Kroll.method (Android), proxy patterns (iOS)
 
 ### iOS Native Development (Objective-C) - CRITICAL RULES
 1. **COMPILE AFTER EVERY SMALL CHANGE** - Nunca agregues múltiples métodos sin compilar
-2. **Check method signatures MATCH** - Proxy methods must match view implementation exactly
-3. **Import headers FIRST** - Include all necessary .h files in proxy before coding
-4. **Use proper casting** - Cast view to correct type: `(TiPaintPaintView*)[self view]`
-5. **Thread safety required** - Use `TiThreadPerformOnMainThread` for return values
-6. **Method naming convention** - Proxy methods take `(id)args`, view methods may not need args
-7. **INCREMENTAL DEVELOPMENT** - Add one method → compile → test → repeat
+2. **SELECTOR SIGNATURES MUST MATCH EXACTLY** - `@selector(undo:)` vs `@selector(undo)` matters!
+3. **Check method signatures MATCH** - Proxy methods must match view implementation exactly
+4. **Import headers FIRST** - Include all necessary .h files in proxy before coding
+5. **Use proper casting** - Cast view to correct type: `(TiPaintPaintView*)[self view]`
+6. **Thread safety required** - Use `TiThreadPerformOnMainThread` for return values
+7. **Method naming convention** - Proxy methods take `(id)args`, view methods may not need args
+8. **INCREMENTAL DEVELOPMENT** - Add one method → compile → test → repeat
+9. **SELECTOR DEBUGGING** - Wrong selector = "unrecognized selector" runtime crash
 
 ### Android Native Development (Java) - ESSENTIAL PRACTICES  
 1. **Import statements FIRST** - Always add missing imports (Handler, etc.) before coding
@@ -118,11 +138,15 @@ titanium build -p ios -T module
 4. **Immediate error fixing** - Never accumulate compilation errors
 5. **Test small changes** - Build after every significant modification
 
-### Testing
+### Testing the Titanium Module
 ```bash
-# Run with example app
-titanium build -p android -d example/
-titanium build -p ios -d example/
+# Install module in test app (after building)
+ti module install android/dist/ti.paint-android-6.0.0.zip
+ti module install ios/dist/ti.paint-iphone-3.0.0.zip
+
+# Run test app with module
+ti build -p android -d example/
+ti build -p ios -d example/
 ```
 
 ## File Structure

@@ -18,12 +18,12 @@
 
 -(void)undo:(id)args
 {
-	[[self view] performSelectorOnMainThread:@selector(undo) withObject:nil waitUntilDone:NO];
+	[[self view] performSelectorOnMainThread:@selector(undo:) withObject:args waitUntilDone:NO];
 }
 
 -(void)redo:(id)args
 {
-	[[self view] performSelectorOnMainThread:@selector(redo) withObject:nil waitUntilDone:NO];
+	[[self view] performSelectorOnMainThread:@selector(redo:) withObject:args waitUntilDone:NO];
 }
 
 -(TiBlob*)toBlob:(id)args
@@ -43,17 +43,17 @@
 
 -(void)pausePlayback:(id)args
 {
-	[[self view] performSelectorOnMainThread:@selector(pausePlayback) withObject:nil waitUntilDone:NO];
+	[[self view] performSelectorOnMainThread:@selector(pausePlayback:) withObject:args waitUntilDone:NO];
 }
 
 -(void)resumePlayback:(id)args
 {
-	[[self view] performSelectorOnMainThread:@selector(resumePlayback) withObject:nil waitUntilDone:NO];
+	[[self view] performSelectorOnMainThread:@selector(resumePlayback:) withObject:args waitUntilDone:NO];
 }
 
 -(void)stopPlayback:(id)args
 {
-	[[self view] performSelectorOnMainThread:@selector(stopPlayback) withObject:nil waitUntilDone:NO];
+	[[self view] performSelectorOnMainThread:@selector(stopPlayback:) withObject:args waitUntilDone:NO];
 }
 
 -(void)setPlaybackSpeed:(id)args
