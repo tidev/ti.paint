@@ -379,20 +379,14 @@ static void drawPoints(const void* key, const void* value, void* ctx)
             [strokeData setObject:pointsArray forKey:@"points"];
         }
         if (width) [strokeData setObject:width forKey:@"strokeWidth"];
-        if (alpha) [strokeData setObject:alpha forKey:@"alpha"];
-        [strokeData setObject:(isErase ? isErase : @(NO)) forKey:@"isErase"];
+        if (alpha) [strokeData setObject:alpha forKey:@"strokeAlpha"];
+        [strokeData setObject:(isErase ? isErase : @(NO)) forKey:@"eraseMode"];
         
         // Convert CGColor to hex string
         if (colorObj) {
             CGColorRef color = (__bridge CGColorRef)colorObj;
             const CGFloat* components = CGColorGetComponents(color);
             size_t numComponents = CGColorGetNumberOfComponents(color);
-            
-            // DEBUG: Log color components
-            NSLog(@"DEBUG: Color has %zu components", numComponents);
-            for (size_t i = 0; i < numComponents; i++) {
-                NSLog(@"DEBUG: Component %zu = %f", i, components[i]);
-            }
             
             int red = 0, green = 0, blue = 0;
             if (numComponents >= 3) {
@@ -405,11 +399,9 @@ static void drawPoints(const void* key, const void* value, void* ctx)
             }
             
             NSString* hexColor = [NSString stringWithFormat:@"#%02x%02x%02x", red, green, blue];
-            NSLog(@"DEBUG: Final hex color: %@", hexColor);
-            [strokeData setObject:hexColor forKey:@"color"];
+            [strokeData setObject:hexColor forKey:@"strokeColor"];
         } else {
-            NSLog(@"DEBUG: No color object, using black");
-            [strokeData setObject:@"#000000" forKey:@"color"];
+            [strokeData setObject:@"#000000" forKey:@"strokeColor"];
         }
         
         [strokesData addObject:strokeData];
@@ -429,9 +421,9 @@ static void drawPoints(const void* key, const void* value, void* ctx)
         // Get stroke data
         NSArray* points = [strokeData objectForKey:@"points"];
         NSNumber* width = [strokeData objectForKey:@"strokeWidth"];
-        NSNumber* alpha = [strokeData objectForKey:@"alpha"];
-        NSString* hexColor = [strokeData objectForKey:@"color"];
-        NSNumber* isErase = [strokeData objectForKey:@"isErase"];
+        NSNumber* alpha = [strokeData objectForKey:@"strokeAlpha"];
+        NSString* hexColor = [strokeData objectForKey:@"strokeColor"];
+        NSNumber* isErase = [strokeData objectForKey:@"eraseMode"];
         
         if (points) {
             NSMutableArray* pointsArray = [[NSMutableArray alloc] init];

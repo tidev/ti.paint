@@ -455,14 +455,14 @@ public class UIPaintView extends TiUIView {
 				// Get paint properties
 				Paint paint = pathPaint.getPaint();
 				
-				// Convert color to hex string (match iOS format)
+				// Convert color to hex string (use Titanium API naming)
 				int color = paint.getColor();
 				String hexColor = String.format("#%06x", color & 0xFFFFFF);
-				strokeData.put("color", hexColor);
+				strokeData.put("strokeColor", hexColor);
 				
 				strokeData.put("strokeWidth", (double)paint.getStrokeWidth());
-				strokeData.put("alpha", paint.getAlpha()); // Keep as 'alpha' for compatibility
-				strokeData.put("isErase", pathPaint.getEarase());
+				strokeData.put("strokeAlpha", paint.getAlpha());
+				strokeData.put("eraseMode", pathPaint.getEarase());
 				
 				// For now, create empty points array (path reconstruction complex)
 				// TODO: Implement proper path point serialization if needed
@@ -489,10 +489,10 @@ public class UIPaintView extends TiUIView {
 					// Create new PathPaint
 					PathPaint pathPaint = new PathPaint();
 					
-					// Set paint properties
+					// Set paint properties (use Titanium API naming)
 					Paint paint = pathPaint.getPaint();
-					if (strokeData.containsKey("color")) {
-						String hexColor = (String) strokeData.get("color");
+					if (strokeData.containsKey("strokeColor")) {
+						String hexColor = (String) strokeData.get("strokeColor");
 						int color = parseHexColor(hexColor);
 						paint.setColor(color);
 					}
@@ -500,11 +500,11 @@ public class UIPaintView extends TiUIView {
 						Double width = (Double) strokeData.get("strokeWidth");
 						paint.setStrokeWidth(width.floatValue());
 					}
-					if (strokeData.containsKey("alpha")) {
-						paint.setAlpha((Integer) strokeData.get("alpha"));
+					if (strokeData.containsKey("strokeAlpha")) {
+						paint.setAlpha((Integer) strokeData.get("strokeAlpha"));
 					}
-					if (strokeData.containsKey("isErase")) {
-						pathPaint.setEarase((Boolean) strokeData.get("isErase"));
+					if (strokeData.containsKey("eraseMode")) {
+						pathPaint.setEarase((Boolean) strokeData.get("eraseMode"));
 					}
 					
 					// Note: Path reconstruction from string is complex
