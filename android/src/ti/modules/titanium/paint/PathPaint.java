@@ -5,56 +5,72 @@ import android.graphics.Paint;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.PointF;
 
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
 
+import java.util.ArrayList;
+
 public class PathPaint {
 
-	private Path myPath;
-	private Paint myPaint;
-	private Boolean isErease = false;
+  private Path myPath;
+  private Paint myPaint;
+  private Boolean isErease = false;
+  private ArrayList<PointF> points = new ArrayList<PointF>();
 
-	public void setPaint(Paint p) {
-			myPaint = p;
-	}
+  public void setPaint(Paint p) {
+    myPaint = p;
+  }
 
-	public Paint getPaint() {
-			if (isErease) {
-					myPaint.setAlpha(0xFF);
-					myPaint.setColor(Color.TRANSPARENT);
-					myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-					myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
-			}
-			return myPaint;
-	}
+  public Paint getPaint() {
+    if (isErease) {
+      myPaint.setAlpha(0xFF);
+      myPaint.setColor(Color.TRANSPARENT);
+      myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+      myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
+    }
+    return myPaint;
+  }
 
-	public Path getPath() {
-			return myPath;
-	}
+  public Path getPath() {
+    return myPath;
+  }
 
-	public void setPath(Path p) {
-			myPath = p;
-	}
+  public void setPath(Path p) {
+    myPath = p;
+  }
 
-	public Boolean getEarase() {
-			return isErease;
-	}
+  public Boolean getEarase() {
+    return isErease;
+  }
 
-	public void setEarase(Boolean p) {
-			isErease = p;
-	}
+  public void setEarase(Boolean p) {
+    isErease = p;
+  }
 
-	public PathPaint() {
-			myPath = new Path();
-			myPaint = new Paint();
+  public ArrayList<PointF> getPoints() {
+    return points;
+  }
 
-			myPaint = new Paint();
-			myPaint.setDither(true);
-			myPaint.setAntiAlias(true);
-			myPaint.setStyle(Paint.Style.STROKE);
-			myPaint.setStrokeCap(Paint.Cap.ROUND);
-			myPaint.setStrokeJoin(Paint.Join.ROUND);
-			myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
-	}
+  public void addPoint(float x, float y) {
+    points.add(new PointF(x, y));
+  }
+
+  public void clearPoints() {
+    points.clear();
+  }
+
+  public PathPaint() {
+    myPath = new Path();
+    myPaint = new Paint();
+
+    myPaint = new Paint();
+    myPaint.setDither(true);
+    myPaint.setAntiAlias(true);
+    myPaint.setStyle(Paint.Style.STROKE);
+    myPaint.setStrokeCap(Paint.Cap.ROUND);
+    myPaint.setStrokeJoin(Paint.Join.ROUND);
+    myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
+  }
 }

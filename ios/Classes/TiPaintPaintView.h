@@ -9,9 +9,9 @@
 
 @interface TiPaintPaintView : TiUIView <WetPaintViewDelegate> {
 @private
-	UIImageView *drawImage;
-	WetPaintView *wetPaintView;
-	CGRect drawBox;
+  UIImageView *drawImage;
+  WetPaintView *wetPaintView;
+  CGRect drawBox;
 }
 
 @end
