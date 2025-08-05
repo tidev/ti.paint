@@ -33,6 +33,8 @@
         strokeAlpha = 1;
 		strokeColor = CGColorRetain([[TiUtils colorValue:@"#000"] _color].CGColor);
         _touchLines = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+        _completedStrokes = [[NSMutableArray alloc] init];
+        _undoStrokes = [[NSMutableArray alloc] init];
         self.opaque = NO;
         self.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.0];
     }
@@ -44,6 +46,8 @@
     CFDictionaryRemoveAllValues(_touchLines);
     _touchLines = NULL;
 	CGColorRelease(strokeColor);
+    [_completedStrokes release];
+    [_undoStrokes release];
 	[super dealloc];
 }
 
@@ -51,6 +55,32 @@
 
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase {
     CGContextSetLineCap(context, kCGLineCapRound);
+    
+    // Draw completed strokes first
+    for (NSDictionary* stroke in _completedStrokes) {
+        NSMutableArray* points = [stroke objectForKey:@"points"];
+        CGFloat width = [[stroke objectForKey:@"strokeWidth"] floatValue];
+        CGFloat alpha = [[stroke objectForKey:@"strokeAlpha"] floatValue];
+        CGColorRef color = (CGColorRef)[stroke objectForKey:@"strokeColor"];
+        bool eraseMode = [[stroke objectForKey:@"erase"] boolValue];
+        
+        CGContextSetLineWidth(context, width);
+        CGContextSetStrokeColorWithColor(context, color);
+        
+        if (!eraseMode) {
+            CGContextSetAlpha(context, alpha);
+            CGContextSetBlendMode(context, kCGBlendModeNormal);
+        } else if (applyErase) {
+            CGContextSetBlendMode(context, kCGBlendModeClear);
+        } else {
+            CGContextSetAlpha(context, 1);
+            CGContextSetStrokeColorWithColor(context, [[TiUtils colorValue:@"#000"] _color].CGColor);
+        }
+        
+        [self drawPointsArray:points inContext:context];
+    }
+    
+    // Draw current active strokes
     CGContextSetLineWidth(context, strokeWidth);
     CGContextSetStrokeColorWithColor(context, strokeColor);
     if (!erase) {
@@ -124,6 +154,9 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
 {
+    // Clear redo history when new stroke starts
+    [_undoStrokes removeAllObjects];
+    
     for (UITouch* touch in [touches allObjects]) {
         CGPoint point = [touch locationInView:self];
         NSValue* value = [NSValue valueWithCGPoint:point];
@@ -161,11 +194,20 @@ static void drawPoints(const void* key, const void* value, void* ctx)
         CGPoint point = [touch locationInView:self];
         NSValue* value = [NSValue valueWithCGPoint:point];
         [points addObject:value];
+        
+        // Save completed stroke to array instead of immediately baking
+        NSDictionary* stroke = [NSDictionary dictionaryWithObjectsAndKeys:
+                               [NSMutableArray arrayWithArray:points], @"points",
+                               [NSNumber numberWithFloat:strokeWidth], @"strokeWidth",
+                               [NSNumber numberWithFloat:strokeAlpha], @"strokeAlpha",
+                               (id)strokeColor, @"strokeColor",
+                               [NSNumber numberWithBool:erase], @"erase",
+                               nil];
+        [_completedStrokes addObject:stroke];
     }
     
-    if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {
-        [delegate readyToSavePaint];
-    }
+    // NOTE: We DON'T call readyToSavePaint here anymore
+    // It will be called only when we actually need to bake the image
     
     for (UITouch* touch in [touches allObjects]) {
         CFDictionaryRemoveValue(_touchLines, touch);
@@ -178,12 +220,30 @@ static void drawPoints(const void* key, const void* value, void* ctx)
 
 - (void)undo
 {
-    // This will be handled by TiPaintPaintView
+    if ([_completedStrokes count] > 0) {
+        NSDictionary* lastStroke = [_completedStrokes lastObject];
+        [_undoStrokes addObject:lastStroke];
+        [_completedStrokes removeLastObject];
+        [self setNeedsDisplay];
+    }
 }
 
 - (void)redo
 {
-    // This will be handled by TiPaintPaintView
+    if ([_undoStrokes count] > 0) {
+        NSDictionary* lastUndoStroke = [_undoStrokes lastObject];
+        [_completedStrokes addObject:lastUndoStroke];
+        [_undoStrokes removeLastObject];
+        [self setNeedsDisplay];
+    }
+}
+
+// Method to force baking when needed
+- (void)bakeStrokesToDelegate
+{
+    if (delegate != nil && [delegate respondsToSelector:@selector(readyToSavePaint)]) {
+        [delegate readyToSavePaint];
+    }
 }
 
 @end

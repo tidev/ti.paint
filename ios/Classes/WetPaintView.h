@@ -20,6 +20,8 @@
 
 @interface WetPaintView : UIView {
     CFMutableDictionaryRef _touchLines;
+    NSMutableArray* _completedStrokes;
+    NSMutableArray* _undoStrokes;
 }
 
 @property CGFloat strokeWidth;
@@ -31,5 +33,6 @@
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase;
 - (void)undo;
 - (void)redo;
+- (void)bakeStrokesToDelegate;
 
 @end

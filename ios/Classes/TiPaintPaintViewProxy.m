@@ -25,4 +25,13 @@
 	[[self view] performSelectorOnMainThread:@selector(redo:) withObject:args waitUntilDone:NO];
 }
 
+-(TiBlob*)toBlob:(id)args
+{
+	__block TiBlob* result = nil;
+	TiThreadPerformOnMainThread(^{
+		result = [[self view] toBlob:args];
+	}, YES);
+	return result;
+}
+
 @end
