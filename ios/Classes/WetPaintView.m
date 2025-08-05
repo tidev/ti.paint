@@ -83,12 +83,9 @@
         if (!eraseMode) {
             CGContextSetAlpha(context, alpha);
             CGContextSetBlendMode(context, kCGBlendModeNormal);
-        } else if (applyErase) {
-            CGContextSetBlendMode(context, kCGBlendModeClear);
         } else {
-            // Show erase strokes with their original color (visual feedback)
-            CGContextSetAlpha(context, alpha);
-            CGContextSetBlendMode(context, kCGBlendModeNormal);
+            // Erase mode: clear pixels (ignore applyErase parameter)
+            CGContextSetBlendMode(context, kCGBlendModeClear);
         }
         
         [self drawPointsArray:points inContext:context];
@@ -363,7 +360,7 @@ static void drawPoints(const void* key, const void* value, void* ctx)
         NSArray* points = [stroke objectForKey:@"points"];
         NSNumber* width = [stroke objectForKey:@"strokeWidth"];
         NSNumber* alpha = [stroke objectForKey:@"strokeAlpha"];
-        id colorObj = [stroke objectForKey:@"color"];
+        id colorObj = [stroke objectForKey:@"strokeColor"];
         NSNumber* isErase = [stroke objectForKey:@"erase"];
         
         if (points) {
@@ -442,7 +439,7 @@ static void drawPoints(const void* key, const void* value, void* ctx)
         // Convert hex string to CGColor
         if (hexColor) {
             UIColor* uiColor = [self colorFromHexString:hexColor];
-            [stroke setObject:(__bridge id)[uiColor CGColor] forKey:@"color"];
+            [stroke setObject:(__bridge id)[uiColor CGColor] forKey:@"strokeColor"];
         }
         
         [_completedStrokes addObject:stroke];

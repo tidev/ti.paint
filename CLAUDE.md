@@ -217,6 +217,13 @@ paintView.undo();        // Instant response, no memory overhead
 paintView.redo();        // Instant response
 ```
 
+**Technical Implementation:**
+- ✅ **Stroke-based system** - stores arrays of stroke objects (points, colors, properties)
+- ✅ **NO image snapshots** - eliminates memory-intensive image copying
+- ✅ **Instant operations** - moves strokes between arrays (`completedStrokes` ↔ `undoStrokes`)
+- ✅ **Cross-platform compatibility** - identical behavior on iOS and Android
+- ✅ **Persistent data** - enables save/load and playback functionality
+
 ### NEW: Playback "Movie Mode" + Stroke Persistence (Cross-Platform)
 ```javascript
 // Replay all drawing strokes over 5 seconds
@@ -234,7 +241,7 @@ paintView.setPlaybackSpeed(2.0);
 var progress = paintView.getPlaybackProgress();
 console.log('Playback is ' + (progress * 100) + '% complete');
 
-// NEW: Save and load stroke data
+// NEW: Save and load stroke data (Cross-Platform Compatible)
 var strokesData = paintView.getStrokesData();
 var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'drawing.json');
 file.write(JSON.stringify(strokesData));
@@ -250,6 +257,23 @@ paintView.playbackDrawing(10.0);  // 10 second tutorial
 setTimeout(function() {
     paintView.setPlaybackSpeed(0.5);  // Slow down for detail
 }, 3000);
+```
+
+### Stroke Data Format (JSON)
+```javascript
+// Consistent across iOS and Android platforms
+[
+  {
+    "strokeColor": "#ff0000",    // Hex color string
+    "strokeWidth": 10.0,         // Float value
+    "strokeAlpha": 255,          // Integer 0-255
+    "eraseMode": false,          // Boolean
+    "points": [                  // Array of coordinate objects
+      {"x": 100.5, "y": 200.3},
+      {"x": 101.2, "y": 201.8}
+    ]
+  }
+]
 ```
 
 ## Distribution
