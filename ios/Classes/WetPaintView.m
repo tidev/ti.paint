@@ -100,6 +100,26 @@ static void drawPoints(const void* key, const void* value, void* ctx)
     CGContextStrokePath(context);
 }
 
+- (void)drawPointsArray:(NSMutableArray*)points inContext:(CGContextRef)context
+{
+    if (points == nil || [points count] == 0) {
+        return;
+    }
+    CGPoint first = [[points objectAtIndex:0] CGPointValue];
+    CGContextBeginPath(context);
+    CGContextMoveToPoint(context, first.x, first.y);
+    NSValue* lastValue = nil;
+    for (NSValue* value in points) {
+        CGPoint point = [value CGPointValue];
+        if (lastValue != nil) {
+            CGPoint lastPoint = [lastValue CGPointValue];
+            CGContextAddQuadCurveToPoint(context, lastPoint.x, lastPoint.y, (point.x + lastPoint.x) / 2, (point.y + lastPoint.y) / 2);
+        }
+        lastValue = value;
+    }
+    CGContextStrokePath(context);
+}
+
 #pragma mark Touch Delegate
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event 
@@ -152,6 +172,18 @@ static void drawPoints(const void* key, const void* value, void* ctx)
     }
     [self setNeedsDisplay];
 	[super touchesEnded:touches withEvent:event];
+}
+
+#pragma mark Undo/Redo
+
+- (void)undo
+{
+    // This will be handled by TiPaintPaintView
+}
+
+- (void)redo
+{
+    // This will be handled by TiPaintPaintView
 }
 
 @end

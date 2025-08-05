@@ -29,5 +29,7 @@
 @property (nonatomic, assign) id<WetPaintViewDelegate> delegate;
 
 - (void)drawInContext:(CGContextRef)context andApplyErase:(bool)applyErase;
+- (void)undo;
+- (void)redo;
 
 @end

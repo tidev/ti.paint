@@ -12,6 +12,8 @@
 	UIImageView *drawImage;
 	WetPaintView *wetPaintView;
 	CGRect drawBox;
+	NSMutableArray* _imageHistory;
+	NSMutableArray* _redoHistory;
 }
 
 @end

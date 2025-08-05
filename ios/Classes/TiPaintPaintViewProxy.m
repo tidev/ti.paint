@@ -15,4 +15,14 @@
 	[[self view] performSelectorOnMainThread:@selector(clear:) withObject:args waitUntilDone:NO];
 }
 
+-(void)undo:(id)args
+{
+	[[self view] performSelectorOnMainThread:@selector(undo:) withObject:args waitUntilDone:NO];
+}
+
+-(void)redo:(id)args
+{
+	[[self view] performSelectorOnMainThread:@selector(redo:) withObject:args waitUntilDone:NO];
+}
+
 @end

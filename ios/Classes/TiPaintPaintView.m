@@ -16,6 +16,8 @@
         self.multipleTouchEnabled = YES;
         wetPaintView = [[WetPaintView alloc] initWithFrame:self.bounds];
         wetPaintView.delegate = self;
+        _imageHistory = [[NSMutableArray alloc] init];
+        _redoHistory = [[NSMutableArray alloc] init];
         [self addSubview:wetPaintView];
         [self bringSubviewToFront:wetPaintView];
     }
@@ -34,6 +36,8 @@
     [wetPaintView removeFromSuperview];
     RELEASE_TO_NIL(wetPaintView);
     RELEASE_TO_NIL(drawImage);
+    [_imageHistory release];
+    [_redoHistory release];
 
     [super dealloc];
 }
@@ -69,6 +73,18 @@
 
 -(void)readyToSavePaint
 {
+    // Save current image state for undo before applying new stroke
+    if ([self imageView].image != nil) {
+        [_imageHistory addObject:[self imageView].image];
+        // Limit history to prevent memory issues
+        if ([_imageHistory count] > 50) {
+            [_imageHistory removeObjectAtIndex:0];
+        }
+    }
+    
+    // Clear redo history when new stroke is made
+    [_redoHistory removeAllObjects];
+    
     UIGraphicsBeginImageContextWithOptions(drawBox.size, NO, 0.0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     [[self imageView].image drawInRect:CGRectMake(0, 0, drawBox.size.width, drawBox.size.height)];
@@ -115,6 +131,10 @@
         [self bringSubviewToFront:wetPaintView];
         UIView *view = [self imageView];
         [drawImage.image drawInRect:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
+        
+        // Clear history when new image is set
+        [_imageHistory removeAllObjects];
+        [_redoHistory removeAllObjects];
     }
 }
 
@@ -122,6 +142,43 @@
 {
     if (drawImage != nil) {
         drawImage.image = nil;
+    }
+    // Clear history when canvas is cleared
+    [_imageHistory removeAllObjects];
+    [_redoHistory removeAllObjects];
+}
+
+- (void)undo:(id)args
+{
+    if ([_imageHistory count] > 0) {
+        // Move current image to redo history
+        if ([self imageView].image != nil) {
+            [_redoHistory addObject:[self imageView].image];
+        }
+        
+        // Restore previous image from history
+        UIImage* previousImage = [_imageHistory lastObject];
+        [self imageView].image = previousImage;
+        [_imageHistory removeLastObject];
+        
+        [self setNeedsDisplay];
+    }
+}
+
+- (void)redo:(id)args
+{
+    if ([_redoHistory count] > 0) {
+        // Move current image back to undo history
+        if ([self imageView].image != nil) {
+            [_imageHistory addObject:[self imageView].image];
+        }
+        
+        // Restore image from redo history
+        UIImage* redoImage = [_redoHistory lastObject];
+        [self imageView].image = redoImage;
+        [_redoHistory removeLastObject];
+        
+        [self setNeedsDisplay];
     }
 }
 

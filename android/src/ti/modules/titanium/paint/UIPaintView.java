@@ -45,7 +45,11 @@ public class UIPaintView extends TiUIView {
 
 		setPaintOptions(); // set initial paint options
 
-		setNativeView(tiPaintView = new PaintView(proxy.getActivity()));
+		// Create PaintView with proper initialization order
+		tiPaintView = new PaintView(proxy.getActivity());
+		
+		// Initialize view after object is fully constructed
+		initializeNativeView();
 
 		if (props.containsKeyAndNotNull("image")) {
 			tiPaintView.setImage(props.getString("image"));
@@ -77,6 +81,11 @@ public class UIPaintView extends TiUIView {
 
 		tiPaint.setAlpha(alphaState);
 		tiPaint.setStrokeWidth(oldWidth);
+	}
+
+	private void initializeNativeView() {
+		setNativeView(tiPaintView);
+		tiPaintView.initializeView();
 	}
 
 	public void setStrokeWidth(Float width) {
@@ -169,7 +178,9 @@ public class UIPaintView extends TiUIView {
 			pathPaint.setPath(mPath);
 			pathPaint.setPaint(tiPaint);
 			pathPaint.setEarase(eraseState);
+		}
 
+		void initializeView() {
 			setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		}
 
