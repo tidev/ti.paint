@@ -5,19 +5,15 @@ import android.graphics.Paint;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.PointF;
 
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.util.TiConvert;
-
-import java.util.ArrayList;
 
 public class PathPaint {
 
   private Path myPath;
   private Paint myPaint;
   private Boolean isErease = false;
-  private ArrayList<PointF> points = new ArrayList<PointF>();
 
   public void setPaint(Paint p) {
     myPaint = p;
@@ -47,18 +43,6 @@ public class PathPaint {
 
   public void setEarase(Boolean p) {
     isErease = p;
-  }
-
-  public ArrayList<PointF> getPoints() {
-    return points;
-  }
-
-  public void addPoint(float x, float y) {
-    points.add(new PointF(x, y));
-  }
-
-  public void clearPoints() {
-    points.clear();
   }
 
   public PathPaint() {

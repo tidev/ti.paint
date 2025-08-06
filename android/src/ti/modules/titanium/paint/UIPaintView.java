@@ -21,6 +21,7 @@ import org.appcelerator.titanium.view.TiUIView;
 import android.content.Context;
 import android.graphics.*;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -51,12 +52,18 @@ public class UIPaintView extends TiUIView {
     // Create PaintView with proper initialization order
     tiPaintView = new PaintView(proxy.getActivity());
 
-    // Initialize view after object is fully constructed
-    initializeNativeView();
-
-    if (props.containsKeyAndNotNull("image")) {
-      tiPaintView.setImage(props.getString("image"));
-    }
+    // Defer initialization to avoid this-escape warning
+    // This will be called after constructor completes
+    proxy.getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        initializeNativeView();
+        
+        if (props.containsKeyAndNotNull("image")) {
+          tiPaintView.setImage(props.getString("image"));
+        }
+      }
+    });
   }
 
   private void setPaintOptions() {
@@ -208,7 +215,7 @@ public class UIPaintView extends TiUIView {
 
     // Playback state
     private ArrayList<PathPaint> playbackPaths = new ArrayList<PathPaint>();
-    private Handler playbackHandler = new Handler();
+    private Handler playbackHandler = new Handler(Looper.getMainLooper());
     private Runnable playbackRunnable;
     private int currentPlaybackIndex = 0;
     private boolean isPlayingBack = false;
@@ -278,9 +285,6 @@ public class UIPaintView extends TiUIView {
       mPath.moveTo(_x, _y);
       currentX = _x;
       currentY = _y;
-      // Track points for serialization
-      pathPaint.clearPoints();
-      pathPaint.addPoint(_x, _y);
     }
 
     public void enable(boolean enable) {
@@ -292,14 +296,10 @@ public class UIPaintView extends TiUIView {
 
       currentX = _x;
       currentY = _y;
-      // Track points for serialization
-      pathPaint.addPoint(_x, _y);
     }
 
     public void touch_up() {
       mPath.lineTo(currentX, currentY);
-      // Add final point
-      pathPaint.addPoint(currentX, currentY);
       tiPaths.add(pathPaint);
 
       mPath = new Path();
@@ -472,9 +472,13 @@ public class UIPaintView extends TiUIView {
         strokeData.put("strokeAlpha", paint.getAlpha());
         strokeData.put("eraseMode", pathPaint.getEarase());
 
-        // Simplified: just add empty points array for consistency with iOS
-        ArrayList<Map<String, Object>> pointsArray = new ArrayList<Map<String, Object>>();
+        // Extract real points using PathMeasure and convert to proper array
+        ArrayList<Map<String, Object>> pointsList = createSimplePointsFromBounds(pathPaint.getPath());
+        Object[] pointsArray = pointsList.toArray();
         strokeData.put("points", pointsArray);
+        
+        // Keep pathData for debugging
+        strokeData.put("pathData", "points:" + pointsList.size());
 
         strokesList.add(strokeData);
       }
@@ -483,76 +487,47 @@ public class UIPaintView extends TiUIView {
     }
 
     public void loadStrokes(Object[] strokesData) {
-      // Clear current strokes
-      tiPaths.clear();
-      undoPaths.clear();
+      try {
+        // Clear current strokes
+        tiPaths.clear();
+        undoPaths.clear();
 
-      // Load each stroke
-      for (Object strokeObj : strokesData) {
-        if (strokeObj instanceof Map) {
-          @SuppressWarnings("unchecked")
-          Map<String, Object> strokeData = (Map<String, Object>) strokeObj;
-
-          // Create new PathPaint
-          PathPaint pathPaint = new PathPaint();
-
-          // Set paint properties (use Titanium API naming)
-          Paint paint = pathPaint.getPaint();
-          if (strokeData.containsKey("strokeColor")) {
-            String hexColor = (String) strokeData.get("strokeColor");
-            int color = parseHexColor(hexColor);
-            paint.setColor(color);
-          }
-          if (strokeData.containsKey("strokeWidth")) {
-            Double width = (Double) strokeData.get("strokeWidth");
-            paint.setStrokeWidth(width.floatValue());
-          }
-          if (strokeData.containsKey("strokeAlpha")) {
-            paint.setAlpha((Integer) strokeData.get("strokeAlpha"));
-          }
-          if (strokeData.containsKey("eraseMode")) {
-            pathPaint.setEarase((Boolean) strokeData.get("eraseMode"));
-          }
-
-          // Reconstruct path from points
-          Path path = new Path();
-          if (strokeData.containsKey("points")) {
+        // Load each stroke
+        for (Object strokeObj : strokesData) {
+          // Handle both Map and Object[] cases (JavaScript serialization differences)
+          Map<String, Object> strokeData = null;
+          if (strokeObj instanceof Map) {
             @SuppressWarnings("unchecked")
-            ArrayList<Map<String, Object>> pointsArray = (ArrayList<Map<String, Object>>) strokeData.get("points");
-
-            if (pointsArray.size() > 0) {
-              // Start path with first point
-              Map<String, Object> firstPoint = pointsArray.get(0);
-              float startX = ((Double) firstPoint.get("x")).floatValue();
-              float startY = ((Double) firstPoint.get("y")).floatValue();
-              path.moveTo(startX, startY);
-              pathPaint.addPoint(startX, startY);
-
-              // Add remaining points using quadTo for smooth curves
-              float prevX = startX, prevY = startY;
-              for (int i = 1; i < pointsArray.size(); i++) {
-                Map<String, Object> point = pointsArray.get(i);
-                float x = ((Double) point.get("x")).floatValue();
-                float y = ((Double) point.get("y")).floatValue();
-
-                // Use quadTo for smooth curves (matching touch_move logic)
-                path.quadTo(prevX, prevY, (x + prevX) / 2, (y + prevY) / 2);
-                pathPaint.addPoint(x, y);
-                prevX = x;
-                prevY = y;
+            Map<String, Object> tempMap = (Map<String, Object>) strokeObj;
+            strokeData = tempMap;
+          } else if (strokeObj instanceof Object[]) {
+            // The strokeObj is actually an array of individual stroke HashMaps
+            Object[] strokeArray = (Object[]) strokeObj;
+            
+            // Process each element in the array as a separate stroke
+            for (Object individualStroke : strokeArray) {
+              if (individualStroke instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> individualStrokeData = (Map<String, Object>) individualStroke;
+                processStroke(individualStrokeData);
               }
-              // Final lineTo (matching touch_up logic)
-              path.lineTo(prevX, prevY);
             }
+            continue; // Continue to next strokeObj
+          } else {
+            continue; // Skip unknown types
           }
-          pathPaint.setPath(path);
-
-          tiPaths.add(pathPaint);
+          
+          if (strokeData != null) {
+            processStroke(strokeData);
+          }
         }
-      }
 
-      // Refresh the view
-      invalidate();
+        // Refresh the view
+        invalidate();
+        
+      } catch (Exception e) {
+        Log.e("UIPaintView", "ERROR in loadStrokes: " + e.getMessage(), e);
+      }
     }
 
     private int parseHexColor(String hexColor) {
@@ -563,6 +538,205 @@ public class UIPaintView extends TiUIView {
         return android.graphics.Color.parseColor(hexColor);
       } catch (IllegalArgumentException e) {
         return android.graphics.Color.BLACK;
+      }
+    }
+
+    private Path parsePathFromString(String pathString) {
+      if (pathString == null || pathString.isEmpty()) {
+        return new Path();
+      }
+
+      try {
+        // Simple approach: try to parse basic path commands
+        // Path.toString() format varies, so we'll create a simple parser
+        return parseSimplePathString(pathString);
+      } catch (Exception e) {
+        // If parsing fails, return empty path
+        return new Path();
+      }
+    }
+
+    private Path parseSimplePathString(String pathString) {
+      Path path = new Path();
+      
+      try {
+        // Debug log to see what we're trying to parse
+        Log.d("UIPaintView", "Parsing path: " + pathString);
+        
+        // More robust parsing using regex to extract coordinates
+        java.util.regex.Pattern coordPattern = java.util.regex.Pattern.compile("([+-]?\\d*\\.?\\d+)");
+        java.util.regex.Matcher matcher = coordPattern.matcher(pathString);
+        
+        java.util.List<Float> coords = new java.util.ArrayList<Float>();
+        while (matcher.find()) {
+          try {
+            coords.add(Float.parseFloat(matcher.group(1)));
+          } catch (NumberFormatException ignored) {
+            // Skip invalid numbers
+          }
+        }
+        
+        // If we have at least 2 coordinates, create a simple path
+        if (coords.size() >= 2) {
+          path.moveTo(coords.get(0), coords.get(1));
+          
+          // Add remaining coordinates as line segments
+          for (int i = 2; i < coords.size() - 1; i += 2) {
+            if (i + 1 < coords.size()) {
+              path.lineTo(coords.get(i), coords.get(i + 1));
+            }
+          }
+        }
+        
+        Log.d("UIPaintView", "Parsed " + coords.size() + " coordinates");
+        
+      } catch (Exception e) {
+        Log.e("UIPaintView", "Path parsing failed: " + e.getMessage());
+        // Return empty path on any error
+      }
+
+      return path;
+    }
+
+    private ArrayList<Map<String, Object>> createSimplePointsFromBounds(Path path) {
+      ArrayList<Map<String, Object>> pointsArray = new ArrayList<Map<String, Object>>();
+      
+      try {
+        // Use PathMeasure to extract actual points from the path!
+        PathMeasure pathMeasure = new PathMeasure(path, false);
+        float pathLength = pathMeasure.getLength();
+        
+        if (pathLength > 0) {
+          // Extract points along the path at regular intervals
+          int numPoints = Math.min(20, Math.max(5, (int)(pathLength / 10))); // 5-20 points based on length
+          float[] coords = new float[2];
+          
+          for (int i = 0; i < numPoints; i++) {
+            float distance = (pathLength * i) / (numPoints - 1);
+            if (pathMeasure.getPosTan(distance, coords, null)) {
+              Map<String, Object> point = new HashMap<String, Object>();
+              point.put("x", (double)coords[0]);
+              point.put("y", (double)coords[1]);
+              pointsArray.add(point);
+            }
+          }
+          
+          }
+      } catch (Exception e) {
+        Log.e("UIPaintView", "Error extracting points from path: " + e.getMessage());
+      }
+      
+      return pointsArray;
+    }
+    
+    private Path reconstructPathFromPoints(ArrayList<Map<String, Object>> pointsArray) {
+      Path path = new Path();
+
+      if (pointsArray.size() > 0) {
+        // Start path with first point
+        Map<String, Object> firstPoint = pointsArray.get(0);
+        float startX = getFloatValue(firstPoint.get("x"));
+        float startY = getFloatValue(firstPoint.get("y"));
+        path.moveTo(startX, startY);
+
+        // Add remaining points using quadTo for smooth curves
+        float prevX = startX, prevY = startY;
+        for (int i = 1; i < pointsArray.size(); i++) {
+          Map<String, Object> point = pointsArray.get(i);
+          float x = getFloatValue(point.get("x"));
+          float y = getFloatValue(point.get("y"));
+
+          // Use quadTo for smooth curves (matching touch_move logic)
+          path.quadTo(prevX, prevY, (x + prevX) / 2, (y + prevY) / 2);
+          prevX = x;
+          prevY = y;
+        }
+        // Final lineTo (matching touch_up logic)
+        path.lineTo(prevX, prevY);
+      }
+
+      return path;
+    }
+    
+    private void processStroke(Map<String, Object> strokeData) {
+      // Create new PathPaint
+      PathPaint pathPaint = new PathPaint();
+
+      // Set paint properties (use Titanium API naming)
+      Paint paint = pathPaint.getPaint();
+      if (strokeData.containsKey("strokeColor")) {
+        String hexColor = (String) strokeData.get("strokeColor");
+        int color = parseHexColor(hexColor);
+        paint.setColor(color);
+      }
+      if (strokeData.containsKey("strokeWidth")) {
+        Object widthObj = strokeData.get("strokeWidth");
+        float width;
+        if (widthObj instanceof Integer) {
+          width = ((Integer) widthObj).floatValue();
+        } else if (widthObj instanceof Double) {
+          width = ((Double) widthObj).floatValue();
+        } else {
+          width = 10.0f; // default
+        }
+        paint.setStrokeWidth(width);
+      }
+      if (strokeData.containsKey("strokeAlpha")) {
+        Object alphaObj = strokeData.get("strokeAlpha");
+        int alpha;
+        if (alphaObj instanceof Integer) {
+          alpha = (Integer) alphaObj;
+        } else if (alphaObj instanceof Double) {
+          alpha = ((Double) alphaObj).intValue();
+        } else {
+          alpha = 255; // default
+        }
+        paint.setAlpha(alpha);
+      }
+      if (strokeData.containsKey("eraseMode")) {
+        pathPaint.setEarase((Boolean) strokeData.get("eraseMode"));
+      }
+
+      // Reconstruct path from points data (both Android and iOS compatible)
+      Path path = new Path();
+      
+      if (strokeData.containsKey("points")) {
+        Object pointsObj = strokeData.get("points");
+        ArrayList<Map<String, Object>> pointsArray = new ArrayList<Map<String, Object>>();
+        
+        // Handle both Object[] (from Android) and ArrayList (from iOS)
+        if (pointsObj instanceof Object[]) {
+          Object[] pointsObjArray = (Object[]) pointsObj;
+          
+          for (Object pointObj : pointsObjArray) {
+            if (pointObj instanceof Map) {
+              @SuppressWarnings("unchecked")
+              Map<String, Object> pointMap = (Map<String, Object>) pointObj;
+              pointsArray.add(pointMap);
+            }
+          }
+        } else if (pointsObj instanceof ArrayList) {
+          @SuppressWarnings("unchecked")
+          ArrayList<Map<String, Object>> tempArray = (ArrayList<Map<String, Object>>) pointsObj;
+          pointsArray = tempArray;
+        }
+        
+        path = reconstructPathFromPoints(pointsArray);
+      }
+
+      pathPaint.setPath(path);
+      tiPaths.add(pathPaint);
+    }
+    
+    private float getFloatValue(Object value) {
+      if (value instanceof Integer) {
+        return ((Integer) value).floatValue();
+      } else if (value instanceof Double) {
+        return ((Double) value).floatValue();
+      } else if (value instanceof Float) {
+        return (Float) value;
+      } else {
+        return 0.0f; // default
       }
     }
   }

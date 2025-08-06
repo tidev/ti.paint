@@ -153,12 +153,17 @@ public class PaintViewProxy extends TiViewProxy {
   @Kroll.method
   public void loadStrokes(Object[] strokesData) {
     if (paintView != null) {
-      paintView.loadStrokes(strokesData);
+      if (!TiApplication.isUIThread()) {
+        TiMessenger.sendBlockingMainMessage(handler.obtainMessage(MSG_LOAD_STROKES, strokesData));
+      } else {
+        paintView.loadStrokes(strokesData);
+      }
     }
   }
 
   private static final int MSG_LOAD = 60001;
   private static final int MSG_CLEAR = 60000;
+  private static final int MSG_LOAD_STROKES = 60002;
 
   private final Handler handler = new Handler(TiMessenger.getMainMessenger().getLooper(), new Handler.Callback() {
     public boolean handleMessage(@NotNull Message msg) {
@@ -172,6 +177,13 @@ public class PaintViewProxy extends TiViewProxy {
         case MSG_LOAD: {
           AsyncResult result = (AsyncResult) msg.obj;
           paintView.setImage(result.getResult().toString());
+          result.setResult(null);
+          return true;
+        }
+        case MSG_LOAD_STROKES: {
+          AsyncResult result = (AsyncResult) msg.obj;
+          Object[] strokesData = (Object[]) result.getResult();
+          paintView.loadStrokes(strokesData);
           result.setResult(null);
           return true;
         }
