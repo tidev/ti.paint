@@ -15,44 +15,45 @@ A **cross-platform Titanium SDK module** providing a paint surface user interfac
 # Install for iOS
 ti module install ti.paint-iphone-3.0.0.zip
 
-# Install for Android  
+# Install for Android
 ti module install ti.paint-android-6.0.0.zip
 ```
 
 ## Quick Start
 ```javascript
-var Paint = require('ti.paint');
-var paintView = Paint.createPaintView({
-    strokeWidth: 10,
-    strokeColor: '#ff0000',
-    strokeAlpha: 255,
-    eraseMode: false
-});
+const Paint = require('ti.paint')
+
+const paintView = Paint.createPaintView({
+  strokeWidth: 10,
+  strokeAlpha: 255,
+  eraseMode: false,
+  strokeColor: '#ff0000'
+})
 
 // Basic drawing operations
-paintView.clear();
+paintView.clear()
 
 // Universal Undo/Redo (now works on both iOS and Android)
-paintView.undo();
-paintView.redo();
+paintView.undo()
+paintView.redo()
 
 // Movie Mode: Playback functionality
-paintView.playbackDrawing(5.0); // Replay all strokes over 5 seconds
-paintView.pausePlayback();
-paintView.resumePlayback();
-paintView.stopPlayback();
-paintView.setPlaybackSpeed(2.0); // Double speed
-var progress = paintView.getPlaybackProgress(); // Returns 0.0-1.0
+paintView.playbackDrawing(5.0) // Replay all strokes over 5 seconds
+paintView.pausePlayback()
+paintView.resumePlayback()
+paintView.stopPlayback()
+paintView.setPlaybackSpeed(2.0) // Double speed
+let progress = paintView.getPlaybackProgress() // Returns 0.0-1.0
 
 // Save and Load: Cross-platform stroke persistence
-var strokesData = paintView.getStrokesData();
-var file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'drawing.json');
-file.write(JSON.stringify(strokesData));
+let strokesData = paintView.getStrokesData()
+let file = Ti.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'drawing.json')
+file.write(JSON.stringify(strokesData))
 
 // Later: Load and replay saved drawing
-var savedData = JSON.parse(file.read().text);
-paintView.loadStrokes(savedData);
-paintView.playbackDrawing(8.0); // Replay loaded session
+let savedData = JSON.parse(file.read().text)
+paintView.loadStrokes(savedData)
+paintView.playbackDrawing(8.0) // Replay loaded session
 ```
 
 ## API Reference
@@ -111,7 +112,7 @@ Enable/disable drawing interaction.
 ### Properties
 
 **`strokeWidth` (Number)**  
-Controls the width of strokes in pixels. Default: varies by platform.
+Controls the width of strokes in pixels. Default: leties by platform.
 
 **`strokeColor` (String)**  
 Controls stroke color. Accepts hex (`#ff0000`), named colors (`red`), or RGB values.
@@ -146,10 +147,10 @@ The stroke data returned by `getStrokesData()` uses this consistent format acros
 ```javascript
 [
   {
-    "strokeColor": "#ff0000",    // Hex color string
-    "strokeWidth": 10.0,         // Stroke width in pixels
     "strokeAlpha": 255,          // Alpha value (0-255)
     "eraseMode": false,          // Boolean erase mode flag
+    "strokeWidth": 10.0,         // Stroke width in pixels
+    "strokeColor": "#ff0000",    // Hex color string
     "points": [                  // Array of path coordinates
       {"x": 100.5, "y": 200.3},
       {"x": 101.2, "y": 201.8}
@@ -161,11 +162,12 @@ The stroke data returned by `getStrokesData()` uses this consistent format acros
 ## Key Features
 
 - ✅ **Cross-platform compatibility** - Identical API on iOS and Android
-- ✅ **Efficient undo/redo** - Stroke-based system (95% less memory than snapshots)
-- ✅ **Movie Mode playback** - Replay drawings as animations with speed control
-- ✅ **Persistent sessions** - Save/load drawings with full stroke data
-- ✅ **Real pixel erasing** - True erasure using blend modes, not white drawing
-- ✅ **Modern SDK support** - Requires Titanium SDK 12.0.0+
+- ✅ **Efficient undo/redo** - Stroke-based system (95% less memory than image snapshots)
+- ✅ **Movie Mode playback** - Replay drawings as animations with speed/progress control
+- ✅ **Persistent sessions** - Save/load drawings with complete stroke data across platforms
+- ✅ **Real pixel erasing** - True pixel erasure using blend modes, not white drawing
+- ✅ **Type-safe data handling** - Robust handling of JavaScript number types (Integer/Double)
+- ✅ **Modern SDK support** - Requires Titanium SDK 12.0.0+ for latest platform compatibility
 
 ## Contributors
 
