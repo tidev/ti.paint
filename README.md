@@ -9,16 +9,6 @@ A **cross-platform Titanium SDK module** providing a paint surface user interfac
 - **Android**: v6.0.0 (API 21+, Android 5.0+)
 - **Minimum Titanium SDK**: 12.0.0
 
-## Installation
-
-```bash
-# Install for iOS
-ti module install ti.paint-iphone-3.0.0.zip
-
-# Install for Android
-ti module install ti.paint-android-6.0.0.zip
-```
-
 ## Quick Start
 ```javascript
 const Paint = require('ti.paint')
