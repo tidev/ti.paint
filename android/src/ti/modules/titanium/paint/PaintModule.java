@@ -11,7 +11,7 @@ import org.appcelerator.kroll.annotations.Kroll;
 
 @Kroll.module(name = "Paint", id = "ti.paint")
 public class PaintModule extends KrollModule {
-	public PaintModule() {
-		super();
-	}
+  public PaintModule() {
+    super();
+  }
 }
