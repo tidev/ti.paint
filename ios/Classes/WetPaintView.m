@@ -1,10 +1,10 @@
 /**
  * WetPaintView.m
  * paint
- * 
+ *
  * Created by Dawson Toth on 4/20/12.
  * Copyright (c) 2012 Toth Solutions, LLC. All rights reserved.
- * 
+ *
  * Ti.Paint Module
  * Copyright (c) 2010-2013 by Appcelerator, Inc. All Rights Reserved.
  * Please see the LICENSE included with this distribution for details.
@@ -494,12 +494,12 @@ static void drawPoints(const void *key, const void *value, void *ctx) {
 
 #pragma mark - UIGestureRecognizerDelegate
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
-{
-    if ([gestureRecognizer isKindOfClass:[UIScreenEdgePanGestureRecognizer class]]) {
-        return NO;
-    }
-    return YES;
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+  if ([gestureRecognizer
+          isKindOfClass:[UIScreenEdgePanGestureRecognizer class]]) {
+    return NO;
+  }
+  return YES;
 }
 
 @end
