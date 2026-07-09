@@ -6,8 +6,7 @@
 
 #import "TiModule.h"
 
-@interface TiPaintModule : TiModule 
-{
+@interface TiPaintModule : TiModule {
 }
 
 @end

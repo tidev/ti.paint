@@ -1,0 +1,21 @@
+{
+  "name": "ti.paint",
+  "description": "ti.paint",
+  "type": "module",
+  "version": "1.0.0",
+  "author": "TiDev, Inc. <npm@tidev.io>",
+  "scripts": {
+    "format": "npm run lint -- --fix",
+    "lint": "clang-format-lint $npm_package_config_format_objc"
+  },
+  "config": {
+    "format": {
+      "objc": "Classes/*.{m,h}"
+    }
+  },
+  "devDependencies": {
+    "@seadub/clang-format-lint": "0.0.2",
+    "clang-format": "^1.8.0"
+  },
+  "license": "Apache-2.0"
+}
