@@ -39,14 +39,26 @@
 - (void)frameSizeChanged:(CGRect)frame bounds:(CGRect)bounds {
   [super frameSizeChanged:frame bounds:bounds];
   [wetPaintView setFrame:bounds];
+
+  CGRect newDrawBox = CGRectMake(bounds.origin.x, bounds.origin.y,
+                                 ceilf(bounds.size.width), ceilf(bounds.size.height));
+
   if (drawImage != nil) {
+    // Re-render backing image at the new size to avoid stretching
+    if (!CGSizeEqualToSize(drawBox.size, newDrawBox.size) && drawImage.image != nil) {
+      UIGraphicsBeginImageContextWithOptions(newDrawBox.size, NO, 0.0);
+      [drawImage.image drawInRect:CGRectMake(0, 0, newDrawBox.size.width, newDrawBox.size.height)];
+      drawImage.image = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+    }
+
     [drawImage setFrame:bounds];
   }
 
-  // MOD-348: Ensure that we get a solid box in which to draw. Otherwise, we'll
-  // end up with blurry lines and visual defects.
-  drawBox = CGRectMake(bounds.origin.x, bounds.origin.y,
-                       ceilf(bounds.size.width), ceilf(bounds.size.height));
+  drawBox = newDrawBox;
+
+  // Force redraw of wet paint strokes so they appear after resize
+  [wetPaintView setNeedsDisplay];
 }
 
 #pragma mark Utility
