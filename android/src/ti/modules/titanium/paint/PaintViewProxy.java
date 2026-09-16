@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 public class PaintViewProxy extends TiViewProxy {
     private static final int MSG_CLEAR = 60000;
     private static final int MSG_LOAD = 60001;
+    private static final int MSG_LOAD_STROKES = 60002;
     private UIPaintView paintView;
     private final Handler handler = new Handler(TiMessenger.getMainMessenger().getLooper(), new Handler.Callback() {
         public boolean handleMessage(@NotNull Message msg) {
@@ -36,6 +37,12 @@ public class PaintViewProxy extends TiViewProxy {
                 case MSG_LOAD: {
                     AsyncResult result = (AsyncResult) msg.obj;
                     paintView.setImage(result.getResult().toString());
+                    result.setResult(null);
+                    return true;
+                }
+                case MSG_LOAD_STROKES: {
+                    AsyncResult result = (AsyncResult) msg.obj;
+                    paintView.loadStrokes((Object[]) result.getArg());
                     result.setResult(null);
                     return true;
                 }
@@ -120,6 +127,69 @@ public class PaintViewProxy extends TiViewProxy {
                 TiMessenger.sendBlockingMainMessage(handler.obtainMessage(MSG_CLEAR));
             } else {
                 paintView.clear();
+            }
+        }
+    }
+
+    // Playback methods
+    @Kroll.method
+    public void playbackDrawing(float durationSeconds) {
+        if (paintView != null) {
+            paintView.playbackDrawing(durationSeconds);
+        }
+    }
+
+    @Kroll.method
+    public void pausePlayback() {
+        if (paintView != null) {
+            paintView.pausePlayback();
+        }
+    }
+
+    @Kroll.method
+    public void resumePlayback() {
+        if (paintView != null) {
+            paintView.resumePlayback();
+        }
+    }
+
+    @Kroll.method
+    public void stopPlayback() {
+        if (paintView != null) {
+            paintView.stopPlayback();
+        }
+    }
+
+    @Kroll.method
+    public void setPlaybackSpeed(float speed) {
+        if (paintView != null) {
+            paintView.setPlaybackSpeed(speed);
+        }
+    }
+
+    @Kroll.method
+    public float getPlaybackProgress() {
+        if (paintView != null) {
+            return paintView.getPlaybackProgress();
+        }
+        return 0.0f;
+    }
+
+    @Kroll.method
+    public Object[] getStrokesData() {
+        if (paintView != null) {
+            return paintView.getStrokesData();
+        }
+        return new Object[0];
+    }
+
+    @Kroll.method
+    public void loadStrokes(Object[] strokesData) {
+        if (paintView != null) {
+            if (!TiApplication.isUIThread()) {
+                TiMessenger.sendBlockingMainMessage(handler.obtainMessage(MSG_LOAD_STROKES), strokesData);
+            } else {
+                paintView.loadStrokes(strokesData);
             }
         }
     }

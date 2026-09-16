@@ -30,10 +30,10 @@ public class PathPaint {
 
     public Paint getPaint() {
         if (isErease) {
-            myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
             myPaint.setAlpha(0xFF);
-            myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
             myPaint.setColor(Color.TRANSPARENT);
+            myPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+            myPaint.setColor(TiConvert.toColor("black", TiApplication.getAppCurrentActivity()));
         }
         return myPaint;
     }

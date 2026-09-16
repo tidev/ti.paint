@@ -22,6 +22,10 @@ v1.0    Initial Release
 
 # Change Log (android)
 <pre>
+v6.1.0	Added playbackDrawing(), pausePlayback(), resumePlayback(), stopPlayback(), setPlaybackSpeed() and getPlaybackProgress()
+		Added getStrokesData() and loadStrokes() to save and restore drawings
+		Touches with more than one finger are ignored while drawing
+
 v2.0.2  [MOD-2167] Recompiled binary for Android 6.0 support
 
 v2.0.2	Building with 2.1.3.GA to support x86 devices
