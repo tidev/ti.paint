@@ -145,6 +145,17 @@ public class UIPaintView extends TiUIView {
         tiPaintView.redo();
     }
 
+    @Override
+    public void release() {
+        // Drop the bitmap, canvas and paths so that a proxy which outlives the window
+        // does not keep the full-size drawing surface and the destroyed activity alive.
+        if (tiPaintView != null) {
+            tiPaintView.release();
+            tiPaintView = null;
+        }
+        super.release();
+    }
+
     public class PaintView extends View {
 
         private static final int maxTouchPoints = 20;
@@ -318,6 +329,14 @@ public class UIPaintView extends TiUIView {
             tiBitmap.eraseColor(Color.TRANSPARENT);
             tiPaths.clear();
             invalidate();
+        }
+
+        public void release() {
+            tiPaths.clear();
+            undoPaths.clear();
+            tiCanvas = null;
+            tiBitmap = null;
+            tiImage = null;
         }
     }
 
