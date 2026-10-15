@@ -54,28 +54,51 @@ public class PaintViewProxy extends TiViewProxy {
         return paintView;
     }
 
+    @Override
+    public void releaseViews() {
+        super.releaseViews();
+        // Drop our own reference as well. The proxy can outlive the window (JS still holds it),
+        // and the view keeps the full-size drawing bitmap and the destroyed activity alive.
+        paintView = null;
+    }
+
     @Kroll.setProperty
     public void setStrokeWidth(Object width) {
+        if (paintView == null) {
+            return;
+        }
         paintView.setStrokeWidth(TiConvert.toFloat(width));
     }
 
     @Kroll.setProperty
     public void setStrokeColor(String color) {
+        if (paintView == null) {
+            return;
+        }
         paintView.setStrokeColor(color);
     }
 
     @Kroll.setProperty
     public void setEraseMode(Boolean toggle) {
+        if (paintView == null) {
+            return;
+        }
         paintView.setEraseMode(toggle);
     }
 
     @Kroll.setProperty
     public void setStrokeAlpha(int alpha) {
+        if (paintView == null) {
+            return;
+        }
         paintView.setStrokeAlpha(alpha);
     }
 
     @Kroll.setProperty
     public void setImage(String imagePath) {
+        if (paintView == null) {
+            return;
+        }
         if (!TiApplication.isUIThread()) {
             TiMessenger.sendBlockingMainMessage(handler.obtainMessage(MSG_LOAD));
         } else {
@@ -85,31 +108,49 @@ public class PaintViewProxy extends TiViewProxy {
 
     @Kroll.method
     public void fill(String color) {
+        if (paintView == null) {
+            return;
+        }
         paintView.fill(TiConvert.toColor(color, TiApplication.getAppCurrentActivity()));
     }
 
     @Kroll.method
     public void lineTo(int x, int y) {
+        if (paintView == null) {
+            return;
+        }
         paintView.lineTo(x, y);
     }
 
     @Kroll.method
     public void moveTo(int x, int y) {
+        if (paintView == null) {
+            return;
+        }
         paintView.moveTo(x, y);
     }
 
     @Kroll.method
     public void undo() {
+        if (paintView == null) {
+            return;
+        }
         paintView.undo();
     }
 
     @Kroll.method
     public void redo() {
+        if (paintView == null) {
+            return;
+        }
         paintView.redo();
     }
 
     @Kroll.method
     public void enable(boolean enable) {
+        if (paintView == null) {
+            return;
+        }
         paintView.enable(enable);
     }
 
