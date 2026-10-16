@@ -16,6 +16,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.common.Log;
@@ -172,6 +173,28 @@ public class UIPaintView extends TiUIView {
             pp.setEarase(eraseState);
 
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+            // A software layer needs width * height * 4 bytes. Android refuses to draw the view
+            // when that exceeds the drawing cache limit, so clamp the size to that limit.
+            int width = getMeasuredWidth();
+            int height = getMeasuredHeight();
+            long maxBytes = ViewConfiguration.get(getContext()).getScaledMaximumDrawingCacheSize();
+            long maxPixels = maxBytes / 4;
+            long pixels = (long) width * height;
+
+            if (maxPixels > 0 && pixels > maxPixels) {
+                double scale = Math.sqrt((double) maxPixels / pixels);
+                int newWidth = Math.max(1, (int) Math.floor(width * scale));
+                int newHeight = Math.max(1, (int) Math.floor(height * scale));
+                Log.w(LCAT, "PaintView size " + width + "x" + height + " exceeds the software layer limit of "
+                    + maxPixels + " pixels. Clamping to " + newWidth + "x" + newHeight + ".");
+                setMeasuredDimension(newWidth, newHeight);
+            }
         }
 
         @Override
